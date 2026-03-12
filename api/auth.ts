@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { supabase } from './lib/supabase.js';
-import { signToken, getTokenFromHeader } from '../lib/jwtHelper';
+import { signToken, getTokenFromHeader } from './lib/jwtHelper.js';
 
 export default async function handler(req: any, res: any) {
   // CORS untuk iframe Blogger
