@@ -252,7 +252,13 @@ export default function App() {
   const [skripJualanLoadingText, setSkripJualanLoadingText] = useState('Membuat skrip...');
 
   // ── Auth gate ─────────────────────────────────────────────────────────
-  if (!user) return <LoginScreen onLogin={login} isLoading={authLoading} error={loginError} />;
+ // SESUDAH
+if (authLoading) return (
+  <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center">
+    <div className="w-8 h-8 border-4 border-purple-500 border-t-yellow-400 rounded-full animate-spin" />
+  </div>
+);
+if (!user) return <LoginScreen onLogin={login} isLoading={authLoading} error={loginError} />;
 
   const isPro   = user.role === 'pro' || user.role === 'admin';
   const isAdmin = user.role === 'admin';
