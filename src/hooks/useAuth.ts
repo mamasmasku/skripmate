@@ -37,6 +37,7 @@ export function useAuth() {
       localStorage.setItem(USER_KEY,  JSON.stringify(data.user));
       setToken(data.token);
       setUser(data.user);
+      window.location.reload(); 
       return true;
     } catch (e: any) {
       setLoginError(e.message);
