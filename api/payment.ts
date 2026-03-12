@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { supabase } from './lib/supabase.js';
-import { getTokenFromHeader } from '../lib/jwtHelper';
+import { getTokenFromHeader } from './lib/jwtHelper.js';
 
 const SERVER_KEY     = process.env.MIDTRANS_SERVER_KEY!;
 const IS_PRODUCTION  = process.env.MIDTRANS_IS_PRODUCTION === 'true';
