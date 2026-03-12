@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { supabase } from './lib/supabase';
+import { supabase } from './lib/supabase.js';
 import { getTokenFromHeader } from '../lib/jwtHelper';
 
 const SERVER_KEY     = process.env.MIDTRANS_SERVER_KEY!;
