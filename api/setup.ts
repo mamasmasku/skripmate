@@ -7,7 +7,7 @@
  * setupKey harus cocok dengan SETUP_SECRET_KEY di environment variable.
  */
 import bcrypt from 'bcryptjs';
-import { supabase } from '../lib/supabase';
+import { supabase } from './lib/supabase';
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
