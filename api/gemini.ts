@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { supabase } from './lib/supabase';
+import { supabase } from './lib/supabase.js';
 import { getTokenFromHeader } from '../lib/jwtHelper';
 
 const GEMINI_DIRECT_URL = 'https://generativelanguage.googleapis.com/v1beta/openai/';
