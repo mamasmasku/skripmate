@@ -2,10 +2,8 @@ import OpenAI from 'openai';
 import { supabase } from '../lib/supabase';
 import { getTokenFromHeader } from '../lib/jwtHelper';
 
-// Base URL untuk free user (Gemini langsung via OpenAI-compatible endpoint)
 const GEMINI_DIRECT_URL = 'https://generativelanguage.googleapis.com/v1beta/openai/';
-// Base URL untuk pro/admin (LiteLLM proxy dengan server key)
-const LITELLM_URL = 'https://litellm.koboi2026.biz.id/v1';
+const LITELLM_URL       = 'https://litellm.koboi2026.biz.id/v1';
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -18,9 +16,9 @@ export default async function handler(req: any, res: any) {
     userPrompt,
     systemInstruction,
     temperature = 0.8,
-    useSearch    = false,
-    creditCost   = 1,
-    userApiKey,      // hanya untuk free user
+    useSearch   = false,   // ✅ akan dipakai di bawah
+    creditCost  = 1,
+    userApiKey,            // hanya untuk free user
   } = req.body;
 
   if (!userPrompt || !systemInstruction)
@@ -60,6 +58,10 @@ export default async function handler(req: any, res: any) {
   try {
     const client = new OpenAI({ apiKey: apiKeyToUse, baseURL });
 
+    // ✅ Google Search Grounding hanya untuk free user (direct Gemini endpoint)
+    // Pro/admin lewat LiteLLM — tidak diaktifkan karena konfigurasi server di luar kendali
+    const shouldUseSearch = useSearch && payload.role === 'free';
+
     const response = await client.chat.completions.create({
       model:       'gemini-2.5-flash',
       temperature: temperature as number,
@@ -67,6 +69,9 @@ export default async function handler(req: any, res: any) {
         { role: 'system', content: systemInstruction },
         { role: 'user',   content: userPrompt },
       ],
+      ...(shouldUseSearch && {
+        tools: [{ googleSearch: {} } as any],
+      }),
     });
 
     const text = response.choices[0]?.message?.content ?? '';
