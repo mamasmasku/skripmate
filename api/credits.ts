@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { supabase } from './lib/supabase';
+import { supabase } from './lib/supabase.js';
 import { getTokenFromHeader } from '../lib/jwtHelper';
 
 export default async function handler(req: any, res: any) {
