@@ -38,30 +38,33 @@ export default function LoginScreen({ onLogin, isLoading, error }: Props) {
           <h2 className="text-lg font-semibold text-zinc-200 text-center">Masuk ke Akun</h2>
 
           {/* Username */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-zinc-400">Username</label>
-            <input
-              type="text"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-              placeholder="Masukkan username kamu"
-              autoComplete="username"
+<input
+  type="text"
+  value={username}
+  onChange={e => setUsername(e.target.value)}
+  onKeyDown={e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      document.getElementById('password-input')?.focus(); // ← pindah ke password
+    }
+  }}
+  placeholder="Masukkan username kamu"
+  autoComplete="username"
               className="bg-gray-900/80 border border-gray-600 rounded-lg px-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
           </div>
 
           {/* Password */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-zinc-400">Password</label>
-            <div className="relative">
-              <input
-                type={showPw ? 'text' : 'password'}
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-                placeholder="Masukkan password"
-                autoComplete="current-password"
+<input
+  id="password-input" // ← tambahkan id
+  type={showPw ? 'text' : 'password'}
+  value={password}
+  onChange={e => setPassword(e.target.value)}
+  onKeyDown={e => {
+    if (e.key === 'Enter') handleSubmit(); // ← submit di sini
+  }}
+  placeholder="Masukkan password"
+  autoComplete="current-password"
                 className="w-full bg-gray-900/80 border border-gray-600 rounded-lg px-4 py-2.5 pr-10 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
               <button
