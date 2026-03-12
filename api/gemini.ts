@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { supabase } from './lib/supabase.js';
-import { getTokenFromHeader } from '../lib/jwtHelper';
+import { getTokenFromHeader } from './lib/jwtHelper.js';
 
 const GEMINI_DIRECT_URL = 'https://generativelanguage.googleapis.com/v1beta/openai/';
 const LITELLM_URL       = 'https://litellm.koboi2026.biz.id/v1';
