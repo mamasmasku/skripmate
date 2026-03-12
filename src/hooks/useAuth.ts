@@ -51,6 +51,7 @@ export function useAuth() {
     localStorage.removeItem(USER_KEY);
     setToken(null);
     setUser(null);
+    window.location.reload();
   }, []);
 
   /** Update kredit di state + localStorage (setelah generate / beli kredit) */
