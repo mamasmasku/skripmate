@@ -66,8 +66,11 @@ export default function LoginScreen({ onLogin, isLoading, error }: Props) {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 onKeyDown={e => {
-                  if (e.key === 'Enter') handleSubmit();
-                }}
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    handleSubmit();
+  }
+}}
                 placeholder="Masukkan password"
                 autoComplete="current-password"
                 className="w-full bg-gray-900/80 border border-gray-600 rounded-lg px-4 py-2.5 pr-10 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
