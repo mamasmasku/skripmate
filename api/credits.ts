@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { supabase } from './lib/supabase.js';
-import { getTokenFromHeader } from '../lib/jwtHelper';
+import { getTokenFromHeader } from './lib/jwtHelper.js';
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
