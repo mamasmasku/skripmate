@@ -260,7 +260,7 @@ if (authLoading) return (
 );
 if (!user) return <LoginScreen onLogin={login} isLoading={authLoading} error={loginError} />;
 
-  const isPro   = user.role === 'pro' || user.role === 'admin';
+const isPro = user.role === 'admin' || user.credits > 0;
   const isAdmin = user.role === 'admin';
 
   // Cek apakah mode ini boleh dipakai
