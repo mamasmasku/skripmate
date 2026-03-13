@@ -9,7 +9,7 @@ interface Props {
 }
 
 export default function CreditDisplay({ user, onBuyCredits, onChangePw, onAdminPanel, onLogout }: Props) {
-  const isPro   = user.role === 'pro'   || user.role === 'admin';
+  const isPro = user.role === 'admin' || user.credits > 0;
   const isAdmin = user.role === 'admin';
 
   const creditColor =
