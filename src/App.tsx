@@ -861,16 +861,49 @@ ${INDONESIAN_CONTEXT_RULE}
 **ATURAN FORMAT WAJIB:**
 - Awali tiap segmen dengan '▶ SEGMEN [N] ([X] detik)'.
 - Pisahkan segmen dengan '--'.
+- Jika ada beberapa konten, pisahkan dengan '*****'.
 - DILARANG tanda kurung [ ] dalam output deskripsi visual.
 - DILARANG penjelasan/komentar apapun sebelum atau sesudah output. Langsung mulai dengan '▶ SEGMEN 1'.
-- DILARANG menuliskan kata "Karakter" sebelum nama/handle karakter.
-- DILARANG mengubah kata-kata dari skrip asli.
-- DILARANG menampilkan layar HP yang menunjukkan aplikasi order apapun.
+- DILARANG menuliskan kata "Karakter" sebelum nama/handle karakter. Langsung tulis nama/handle-nya.
+- DILARANG mengubah kata-kata dari skrip asli. Hanya boleh memotong di jeda natural.
+
+**ATURAN VISUAL PER ADEGAN:**
+- Dominasi wide shot dan medium shot — minimal 5 dari 8 adegan harus wide atau medium.
+- Close-up MAKSIMAL 1 kali per segmen, hanya untuk detail paling impactful.
+- Wide shot WAJIB memperlihatkan objek utama SEKALIGUS konteks/lingkungan sekitarnya —
+  contoh makanan: "wide shot meja makan dengan hidangan lengkap, suasana outlet ramai di latar"
+  contoh produk: "wide shot jaket dipakai model, suasana ruangan lifestyle terlihat di latar"
+  contoh umum: "wide shot subjek utama dengan lingkungan relevan terlihat di sekitarnya"
+- Medium shot juga harus memperlihatkan konteks —
+  contoh makanan: "medium shot produk di piring dengan dekorasi warung terlihat di sekitarnya"
+  contoh produk: "medium shot produk dipegang dengan latar ruangan/outdoor yang relevan"
+  contoh umum: "medium shot elemen utama konten dengan konteks lingkungan yang sesuai topik"
+
+LARANGAN VISUAL PLATFORM LAIN — WAJIB:
+- DILARANG menampilkan layar HP yang menunjukkan aplikasi order (GoFood, GrabFood, Shopee Food, Tokopedia, Shopee, TikTok Shop, dll)
+- DILARANG menampilkan UI/interface aplikasi apapun di layar HP atau tablet
+- DILARANG menampilkan struk digital, notifikasi order, atau konfirmasi pembelian dari aplikasi lain
+- DILARANG visual tangan mengetuk/scroll layar HP yang menampilkan platform lain
+- Jika perlu menunjukkan "cara order", gunakan: tangan mengetuk udara, gestur menunjuk ke bawah, atau karakter berbicara langsung ke kamera — TANPA memperlihatkan layar HP
+- Jika perlu menunjukkan "harga lebih murah", gunakan: visual produk dengan label harga fisik, karakter memegang uang Rupiah, atau gestur jempol ke bawah (harga turun) — TANPA layar HP.
 
 PANDUAN VISUAL BERDASARKAN KATEGORI:
 ${uraiVisualGuide}
 
-PRINSIP UTAMA: Visual harus mendukung narasi skrip secara kontekstual. Jangan terpaku pada format review tempat jika skrip bukan tentang tempat.`;
+URUTAN SHOT YANG DISARANKAN per segmen (${totalScenes} adegan):
+wide shot suasana tempat/konteks lengkap → medium shot elemen utama dengan latar terlihat →
+medium shot sudut berbeda → wide shot area menarik lainnya →
+medium shot detail dengan konteks → close-up impactful (1x) →
+medium shot suasana → wide shot penutup keseluruhan.
+
+PRINSIP UTAMA: Visual harus mendukung narasi skrip secara kontekstual — sesuaikan 
+dengan kategori "${category}". Jangan terpaku pada format review tempat jika skrip 
+bukan tentang tempat. Visual harus memperkuat pesan skrip, bukan terisolasi dari konteks.
+
+- Adegan on-screen karakter: deskripsikan ekspresi, gestur, dan posisi karakter secara spesifik.
+- Adegan off-screen (VO): WAJIB deskripsikan visual tempat/produk/konteks dengan suasana — 
+  BUKAN hanya objek sendirian.
+- DILARANG adegan off-screen diisi deskripsi karakter dalam bentuk apapun.`;
 
     const systemInstruction =
       promptMode === 'bebas' ? bebasModeInstruction :
