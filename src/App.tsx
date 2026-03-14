@@ -681,9 +681,19 @@ PANDUAN PANJANG SKRIP BERDASARKAN TOTAL DURASI:
 
 TAHAP 3 — BAGI SKRIP KE SEGMEN & ADEGAN
 - Hitung segmen WAJIB: Total Durasi ÷ Durasi per Segmen
-- SETIAP segmen maksimal ${maxWords} kata dialog
+  Contoh: 30 detik ÷ 15 detik = 2 segmen → WAJIB buat 2 segmen terpisah
+  Contoh: 45 detik ÷ 15 detik = 3 segmen → WAJIB buat 3 segmen terpisah
+- SETIAP segmen maksimal ${maxWords} kata dialog — DILARANG melebihi batas ini
 - DILARANG menggabungkan semua dialog ke 1 segmen meskipun skrip terasa menyatu
-- CEK WAJIB FINAL: hitung jumlah ▶ SEGMEN di output, jika kurang → tambahkan sebelum selesai
+- Potong skrip ke segmen di jeda natural (koma, titik, jeda napas) — JANGAN potong tengah kalimat
+- Setiap segmen harus berdiri sendiri sebagai video Sora yang terpisah
+- CEK WAJIB FINAL sebelum output:
+  1. Hitung: Total Durasi ÷ Durasi per Segmen = jumlah segmen WAJIB
+     Contoh: 30 ÷ 15 = 2 → output WAJIB ada ▶ SEGMEN 1 DAN ▶ SEGMEN 2
+     Contoh: 45 ÷ 15 = 3 → output WAJIB ada ▶ SEGMEN 1, 2, DAN 3
+  2. Hitung berapa kali '▶ SEGMEN' muncul di output yang sudah ditulis
+  3. Jika jumlahnya KURANG → WAJIB tambahkan segmen yang kurang SEBELUM selesai
+  4. DILARANG output hanya 1 segmen jika Total Durasi > Durasi per Segmen
 
 TAHAP 4 — FORMAT OUTPUT
 LANGSUNG mulai output dengan ▶ SEGMEN 1 tanpa penjelasan, tanpa intro, tanpa komentar apapun.
@@ -710,7 +720,11 @@ Buatkan video realistic ${character || 'faceless'} sedang review ${nameDesc} den
 
 Deskripsi visual adegan 1, Dialog: "kalimat dialog 1"
 Deskripsi visual adegan 2, Dialog: "kalimat dialog 2"
-[dst...]
+Deskripsi visual adegan 3, Dialog: "kalimat dialog 3"
+Deskripsi visual adegan 4, Dialog: "kalimat dialog 4"
+Deskripsi visual adegan 5, Dialog: "kalimat dialog 5"
+${totalScenes === 7 ? `Deskripsi visual adegan 6, Dialog: "kalimat dialog 6"
+Deskripsi visual adegan 7, Dialog: "kalimat dialog 7"` : ''}
 
 ===
 
