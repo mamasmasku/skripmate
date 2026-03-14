@@ -736,9 +736,61 @@ ${INDONESIAN_CONTEXT_RULE}
 - WAJIB awali tiap segmen dengan '▶ SEGMEN [N] ([X] detik)'.
 - WAJIB pisahkan segmen dengan '--', pisahkan konten dengan '*****'.
 - DILARANG tanda kurung [ ] dalam deskripsi visual output.
-- DILARANG penjelasan/komentar apapun sebelum atau sesudah output.
-- DILARANG menuliskan kata "Karakter" sebelum nama/handle karakter.
-- DILARANG menampilkan layar HP yang menunjukkan aplikasi order apapun.`;
+- DILARANG penjelasan/komentar apapun sebelum atau sesudah output. Langsung mulai dengan '▶ SEGMEN 1'.
+- DILARANG menuliskan kata "Karakter" sebelum nama/handle karakter. Langsung tulis nama/handle-nya.
+- Jika membuat lebih dari 1 konten: SETIAP konten WAJIB menggunakan gaya berbeda sesuai distribusi. Hook dan struktur narasi HARUS berbeda antar konten
+
+LARANGAN VISUAL PLATFORM LAIN — WAJIB:
+- DILARANG menampilkan layar HP yang menunjukkan aplikasi order (GoFood, GrabFood, Shopee Food, Tokopedia, Shopee, TikTok Shop, dll)
+- DILARANG menampilkan UI/interface aplikasi apapun di layar HP atau tablet
+- DILARANG menampilkan struk digital, notifikasi order, atau konfirmasi pembelian dari aplikasi lain
+- DILARANG visual tangan mengetuk/scroll layar HP yang menampilkan platform lain
+- Jika perlu menunjukkan "cara order", gunakan: tangan mengetuk udara, gestur menunjuk ke bawah, atau karakter berbicara langsung ke kamera — TANPA memperlihatkan layar HP
+- Jika perlu menunjukkan "harga lebih murah", gunakan: visual produk dengan label harga fisik, karakter memegang uang Rupiah, atau gestur jempol ke bawah (harga turun) — TANPA layar HP.
+
+- ATURAN VISUAL — WAJIB FOKUS KE OBJEK REVIEW:
+  Mayoritas adegan (minimal ${totalScenes === 5 ? '4' : '5'} dari ${totalScenes} adegan per segmen) HARUS menampilkan visual objek review, bukan karakter.
+  Karakter hanya muncul di adegan on-screen yang sudah ditentukan — adegan lainnya WAJIB fokus ke visual produk/tempat.
+
+  UNTUK REVIEW MAKANAN/MINUMAN:
+  Prioritaskan visual: wide shot hidangan lengkap di meja dengan suasana outlet terlihat, medium shot
+  detail makanan dengan dekorasi tempat di latar, medium shot proses penyajian dengan counter/dapur terlihat,
+  wide shot interior outlet nyaman dengan pengunjung, medium shot minuman segar dengan meja dan tempat di sekitarnya.
+
+  UNTUK REVIEW HOTEL:
+  Prioritaskan visual: wide shot interior kamar lengkap dengan pencahayaan hangat, medium shot area
+  fasilitas (kolam, lobby) dengan suasana keseluruhan terlihat, wide shot eksterior hotel,
+  medium shot detail amenities dalam konteks ruangan penuh.
+
+  UNTUK REVIEW TEMPAT WISATA:
+  Prioritaskan visual: wide shot panorama lokasi dengan landmark dan pengunjung terlihat, medium shot
+  spot ikonik dengan suasana sekitar, wide shot area berbeda yang menarik, medium shot aktivitas
+  atau keunikan tempat dalam konteks lingkungan penuh.
+  KOMPOSISI SHOT — ATURAN KETAT:
+  - DOMINASI wide shot dan medium shot — minimal ${totalScenes === 5 ? '4' : '5'} dari ${totalScenes} adegan harus wide atau medium
+  - Close-up MAKSIMAL 1 kali per segmen, hanya untuk detail paling impactful
+  - Wide shot WAJIB memperlihatkan objek review SEKALIGUS suasana/lingkungan sekitarnya
+  - Medium shot juga harus memperlihatkan konteks tempat — produk tidak boleh terisolasi dari suasana
+  - DILARANG close-up yang memotong konteks tempat/suasana dari frame
+
+  URUTAN SHOT YANG DISARANKAN per segmen:
+  ${totalScenes === 5 ? `(10 detik = 5 adegan):
+  wide shot suasana tempat lengkap → medium shot produk dengan latar terlihat →
+  medium shot sudut berbeda dengan suasana → close-up detail impactful (1x) →
+  wide shot/medium shot penutup suasana keseluruhan.` 
+  : `(15 detik = 7 adegan):
+  wide shot suasana outlet/tempat lengkap → medium shot produk dengan latar tempat terlihat →
+  medium shot sudut berbeda dengan suasana → wide shot area lain yang menarik →
+  medium shot detail produk dengan konteks → close-up detail impactful (1x saja) →
+  wide shot/medium shot penutup suasana keseluruhan.`}
+
+  PRINSIP UTAMA: Setiap shot harus menjawab "terlihat seperti apa tempatnya?" — penonton
+  harus bisa membayangkan suasana berada di sana, bukan hanya melihat produk terisolasi.
+
+  DILARANG: close-up yang memotong konteks tempat/suasana dari frame.
+  DILARANG: adegan off-screen diisi deskripsi karakter dalam bentuk apapun.
+  DILARANG: mendominasi segmen dengan shot karakter lebih dari 2 adegan per segmen.
+  `;
 
     // ── MODE URAI (system prompt dari original) ───────────────────────
     const uraiDialogRule = buildUraiDialogRule(characterAppearance, segmentDuration, maxWords, totalScenes);
