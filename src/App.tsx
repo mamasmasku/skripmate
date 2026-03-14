@@ -1100,7 +1100,7 @@ ${prompt}`;
                   {promptMode === 'bebas' && (
                     <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-lg px-4 py-3">
                       <p className="text-xs font-semibold text-yellow-400 mb-1">🚀 Cara Kerja Mode Ini</p>
-                      <p className="text-xs text-zinc-400">Isi form → AI riset produk lewat Google lalu buat prompt video sinematik gaya TikTok GO. Output berbentuk paragraf naratif siap pakai di Sora.</p>
+                      <p className="text-xs text-zinc-400">Isi form → Isi form → AI riset produk lewat Google lalu langsung buat prompt video sinematik gaya TikTok GO. Output berbentuk paragraf naratif siap pakai di Sora, adegan di tentukan oleh sora, untuk panjang dialog atau narasi bisa di edit jika terlalu panjang, seg 10 detik ideal 25 kata, seg 15 detik 37 kata. cek jumlah kata bisa di mode urai bagian bawah di input narasi.</p>
                     </div>
                   )}
 
@@ -1120,7 +1120,7 @@ ${prompt}`;
                     <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="flex flex-col gap-6 mt-2 pt-4 border-t border-purple-800">
                       <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-lg px-4 py-3">
                         <p className="text-xs font-semibold text-yellow-400 mb-1">✂️ Cara Kerja Mode Ini</p>
-                        <p className="text-xs text-zinc-400">Berikan skripmu → AI bertindak sebagai sutradara: menentukan jumlah segmen, membagi dialog ke setiap adegan (~2 detik/adegan), dan merancang visual sinematik.</p>
+                        <p className="text-xs text-zinc-400">Berikan skripmu → AI bertindak sebagai sutradara: menentukan jumlah segmen, membagi dialog ke setiap adegan (~2 detik/adegan), dan merancang visual sinematik. Dialog tidak diubah, hanya dibagi. Kategori wajib di pilih sesuaikan dengan apa yang mau di urai, Efektif untuk membuat video dengan gambar referensi di sora seperti foto produk Lokasi dll.</p>
                       </div>
                       <AppearanceSelector value={characterAppearance} onChange={setCharacterAppearance} />
                       <ScenePreviewBox scenePreview={scenePreview} segmentDuration={segmentDuration} mode="urai" />
