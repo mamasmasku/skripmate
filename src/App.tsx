@@ -678,6 +678,16 @@ PANDUAN PANJANG SKRIP BERDASARKAN TOTAL DURASI:
 - 60 detik = ±180 kata
 - 90 detik = ±260 kata
 - KALIMAT PERTAMA WAJIB mengandung pesan inti: lewat tag lokasi di bawah harganya lebih hemat dari datang langsung
+- Hitung dulu: (Total Detik ÷ Durasi Segmen) × Maks Kata Per Segmen = target kata skrip
+- Tulis skrip hingga MENDEKATI target kata — JANGAN berhenti di setengahnya
+- Kalimat sambung menyambung natural, tidak ada label section (🎣 HOOK:, 📖 STORY:, dsb)
+- JANGAN langsung ke format segmen — selesaikan paragraf skrip penuh dulu
+
+RUMUS ALUR NARASI (pilih salah satu sesuai gaya konten):
+- UGC / Problem-Solution: Hook masalah relatable → pengalaman personal → temuan produk → detail menarik → CTA
+- Storytelling: Hook situasi → konflik kecil → momen "wow" → resolusi memuaskan → CTA
+- Soft Selling / Listicle: Hook fakta/insight → edukasi poin 1 → poin 2 → poin 3 → CTA logis
+- Cinematic: Kalimat pendek puitis → detail sensorik kuat → keistimewaan → CTA elegan
 
 TAHAP 3 — BAGI SKRIP KE SEGMEN & ADEGAN
 - Hitung segmen WAJIB: Total Durasi ÷ Durasi per Segmen
