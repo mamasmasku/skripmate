@@ -18,7 +18,7 @@ import LoginScreen from './components/LoginScreen';
 import CreditDisplay from './components/CreditDisplay';
 import BuyCreditsModal from './components/BuyCreditsModal';
 import AdminPanel from './components/AdminPanel';
-
+ 
 // ── Konstanta ─────────────────────────────────────────────────────────────
 const FREE_API_KEY_STORAGE = 'gemini_api_key_scriptmate';
 
