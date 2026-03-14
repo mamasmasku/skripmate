@@ -1131,6 +1131,14 @@ ${prompt}`;
                 {/* Input User */}
                 <div className="flex flex-col gap-6 p-6 bg-gray-800/50 border border-purple-700 rounded-xl">
                   <h2 className="text-2xl font-semibold text-yellow-400 border-b border-purple-700 pb-3">📥 Input User</h2>
+                <div className="bg-gray-900/60 border border-gray-700 rounded-lg px-4 py-3">
+                  <p className="text-xs font-semibold text-purple-300 mb-2">📌 Panduan Kategori per Mode</p>
+                  <div className="flex flex-col gap-1 text-xs text-zinc-500">
+                    <p><span className="text-yellow-400 font-medium">Bebas & Rapi</span> → hanya untuk Makanan/Minuman, Hotel, Tempat Wisata (ada bank hook & panduan visual lengkap)</p>
+                    <p><span className="text-yellow-400 font-medium">Urai</span> → Membuat Prompt sora dari mengurai Narasi Skrip apa saja misal skrip buatan sendiri ChatGPT Gemini dll, Sesuakan Kategori dengan apa yang mau di urai</p>
+                    <p><span className="text-yellow-400 font-medium">Skrip Jualan</span> → Membuat Narasi Skrip Khusus Jualan pakai kategori Produk Jualan</p>
+                  </div>
+                </div>                  
                   <Select label="Kategori" id="category" value={category} onChange={e => setCategory(e.target.value)}>
                     <option>Makanan/Minuman</option>
                     <option>Hotel</option>
