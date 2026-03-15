@@ -622,7 +622,7 @@ export default function App() {
   const [nameDesc, setNameDesc] = useState('');
   const [character, setCharacter] = useState('');
   const [segmentDuration, setSegmentDuration] = useState('15');
-  const [totalDuration, setTotalDuration] = useState('45');
+  const [totalDuration, setTotalDuration] = useState('15');
   const [contentCount, setContentCount] = useState('1');
   const [promptMode, setPromptMode] = useState<PromptModeKey>('bebas');
   const [rapiSubMode, setRapiSubMode] = useState<RapiSubModeKey>('tanpa-text');
