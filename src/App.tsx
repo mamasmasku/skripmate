@@ -788,13 +788,14 @@ export default function App() {
     try {
       const creditCost = config.jumlahSkrip;
       const data = await callGemini({
-        userPrompt: buildSkripJualanUserPrompt(config),
-        systemInstruction: buildSkripJualanSystemPrompt(config),
-        temperature: 0.8,
-        useSearch: false,
-        creditCost,
-        ...(isPro ? {} : { userApiKey: freeApiKey }),
-      });
+  userPrompt: buildSkripJualanUserPrompt(config),
+  systemInstruction: buildSkripJualanSystemPrompt(config),
+  temperature: 0.8,
+  useSearch: false,
+  promptMode: 'skrip-jualan',
+  contentCount: String(config.jumlahSkrip),
+  ...(isPro ? {} : { userApiKey: freeApiKey }),
+});
       setSkripJualanOutput(data.text || '');
       if (data.credits !== undefined) updateCredits(data.credits);
     } catch (e: any) {
@@ -1161,13 +1162,18 @@ ${stylePerContent}`;
 
     try {
       const data = await callGemini({
-        userPrompt,
-        systemInstruction,
-        temperature: promptMode === 'urai' ? 0.65 : isDenganTextMode ? 0.75 : 0.8,
-        useSearch: promptMode !== 'urai',
-        creditCost,
-        ...(isPro ? {} : { userApiKey: freeApiKey }),
-      });
+  userPrompt,
+  systemInstruction,
+  temperature: promptMode === 'urai' ? 0.65 : 0.8,
+  useSearch: promptMode !== 'urai',
+  promptMode,
+  totalDuration,
+  segmentDuration,
+  contentCount,
+  scriptInputWordCount: scriptInput.trim().split(/\s+/).filter(Boolean).length,
+  bebasSubMode,
+  ...(isPro ? {} : { userApiKey: freeApiKey }),
+});
 
       if (data.credits !== undefined) updateCredits(data.credits);
 
