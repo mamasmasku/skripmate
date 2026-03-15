@@ -1171,7 +1171,7 @@ ${stylePerContent}`;
   segmentDuration,
   contentCount,
   scriptInputWordCount: scriptInput.trim().split(/\s+/).filter(Boolean).length,
-  bebasSubMode,
+  rapiSubMode,
   ...(isPro ? {} : { userApiKey: freeApiKey }),
 });
 
