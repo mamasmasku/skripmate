@@ -499,14 +499,6 @@ GAYA VIDEO
 Add TikTok style subtitles, promo graphics, and engaging overlay text.
 
 ⸻
-ATURAN PANJANG DIALOG — WAJIB DIPATUHI:
-Patokan: ~3 kata per detik. Batas per section TIDAK BOLEH dilewati.
-${slotWords.map(s => `• ${s.from}–${s.to} dtk (${parseInt(s.to)-parseInt(s.from)} dtk) → maks ${s.maxWords} kata`).join('\n')}
-Total seluruh segmen: maks ${totalMaxWords} kata.
-CEK WAJIB sebelum output: hitung kata setiap section — jika melebihi batas, potong sampai sesuai.
-DILARANG menambah kalimat extra dengan alasan "lebih informatif" — padat dan singkat lebih baik.
-
-⸻
 ALUR VIDEO
 ${sceneList}
 
@@ -533,6 +525,13 @@ ${scriptSections}
 - SFX: deskripsi suara WAJIB spesifik (bukan hanya "SFX ada" — tulis bunyi spesifik apa yang terdengar).
 - Jika membuat lebih dari 1 konten: SETIAP konten wajib menggunakan gaya konten berbeda sesuai distribusi, hook BERBEDA di setiap konten.
 
+ATURAN PANJANG DIALOG — WAJIB DIPATUHI:
+Patokan: ~3 kata per detik. Batas per section TIDAK BOLEH dilewati.
+${slotWords.map(s => `• ${s.from}–${s.to} dtk (${parseInt(s.to)-parseInt(s.from)} dtk) → maks ${s.maxWords} kata`).join('\n')}
+Total seluruh segmen: maks ${totalMaxWords} kata.
+CEK WAJIB sebelum output: hitung kata setiap section — jika melebihi batas, potong sampai sesuai.
+DILARANG menambah kalimat extra dengan alasan "lebih informatif" — padat dan singkat lebih baik.
+
 ${INDONESIAN_CONTEXT_RULE}
 
 LARANGAN VISUAL PLATFORM LAIN — WAJIB:
@@ -540,7 +539,11 @@ LARANGAN VISUAL PLATFORM LAIN — WAJIB:
 - DILARANG menampilkan UI/interface aplikasi apapun di layar HP atau tablet
 - DILARANG menampilkan struk digital, notifikasi order, atau konfirmasi pembelian dari platform lain
 - Jika perlu tunjukkan "cara order": tangan mengetuk udara, gestur menunjuk ke bawah, atau karakter bicara ke kamera — TANPA layar HP
-- Jika perlu tunjukkan "harga lebih murah": visual produk dengan label harga fisik, karakter memegang uang Rupiah, atau gestur jempol ke bawah — TANPA layar HP`;
+- Jika perlu tunjukkan "harga lebih murah": visual produk dengan label harga fisik, karakter memegang uang Rupiah, atau gestur jempol ke bawah — TANPA layar HP
+INSTRUKSI FORMAT OUTPUT — SANGAT PENTING:
+- DILARANG KERAS menampilkan bagian "ATURAN PANJANG DIALOG", "ALUR KERJA", "TAHAP", atau instruksi apapun dari system prompt ini di dalam output
+- Output HANYA berisi: deskripsi produk visual, latar belakang, gaya video, alur video, dan skrip time-coded
+- Langsung mulai output dengan '▶ SEGMEN 1' tanpa komentar, tanpa penjelasan, tanpa aturan apapun`;`;
 };
 
 // ── Tipe ──────────────────────────────────────────────────────────────────
