@@ -325,30 +325,40 @@ const buildRapiDenganTextSystemPrompt = (
 
   const charLabel = character || 'Karakter';
 
+  const wordsPerSec = 3;
+  const slotWords = timeSlots.map(slot => ({
+    ...slot,
+    maxWords: Math.round((parseInt(slot.to) - parseInt(slot.from)) * wordsPerSec),
+  }));
+
   let bodyCount = 0;
   let ctaSeen = false;
-  const scriptSections = timeSlots.map((slot) => {
+  const scriptSections = slotWords.map((slot) => {
     const isCTA = slot.label === 'CTA';
     const isHook = slot.label === 'HOOK';
     if (slot.label === 'BODY') bodyCount++;
     const currentBody = bodyCount;
     const isClosingBody = slot.label === 'BODY' && ctaSeen;
     if (isCTA) ctaSeen = true;
+    const durSec = parseInt(slot.to) - parseInt(slot.from);
 
     let content = '';
     if (isHook) {
-      content = `Voice over: "[kalimat hook yang kuat sesuai gaya konten — mulai dari keunggulan/fakta mengejutkan produk]"\nText di layar: [emoji] [HOOK TEXT KAPITAL VIRAL] [emoji] [subtext menarik]`;
+      content = `Voice over (maks ${slot.maxWords} kata / ${durSec} detik): "[kalimat hook yang kuat sesuai gaya konten — mulai dari keunggulan/fakta mengejutkan produk]"\nText di layar: [emoji] [HOOK TEXT KAPITAL VIRAL] [emoji] [subtext menarik]`;
     } else if (isCTA) {
-      content = `${charLabel} on-screen berkata: "[kalimat 1 — keunggulan/promo utama yang memukau]. [kalimat 2 — ajakan klik tag lokasi di bawah video untuk dapatkan promo/harga hemat]."\nText: [emoji] [CTA TEXT KAPITAL] 📍 Klik lokasi sekarang`;
+      const kataPerKalimat = Math.floor(slot.maxWords / 2);
+      content = `${charLabel} on-screen (maks ${slot.maxWords} kata total / ${durSec} detik — ~${kataPerKalimat} kata per kalimat):\nKalimat 1: "[keunggulan/promo utama — maks ${kataPerKalimat} kata]"\nKalimat 2: "[ajakan klik tag lokasi di bawah video — maks ${kataPerKalimat} kata]"\nText: [emoji] [CTA TEXT KAPITAL] 📍 Klik lokasi sekarang`;
     } else if (isClosingBody) {
-      content = `Voice over: "[kalimat penutup singkat yang memperkuat kesan produk — tanpa narasi baru, cukup 1 kalimat]"\nVisual: [close-up atau wide shot produk/tempat yang paling impactful — sebagai penutup sinematik]\nText overlay: [emoji] [tagline pendek] [emoji]`;
+      content = `Voice over (maks ${slot.maxWords} kata / ${durSec} detik): "[1 kalimat penutup singkat yang memperkuat kesan produk]"\nVisual: [close-up atau wide shot produk/tempat yang paling impactful]\nText overlay: [emoji] [tagline pendek] [emoji]`;
     } else {
-      content = `Dialog: "[narasi body ${currentBody} dari hasil riset — detail keunggulan/fakta menarik produk]"\nText overlay: [emoji] [poin keunggulan singkat] [emoji] [detail menarik]`;
+      content = `Voice over (maks ${slot.maxWords} kata / ${durSec} detik): "[narasi body ${currentBody} dari hasil riset — detail keunggulan/fakta menarik]"\nText overlay: [emoji] [poin keunggulan singkat] [emoji] [detail menarik]`;
     }
 
     const sectionLabel = isCTA ? 'CTA' : isHook ? 'HOOK' : isClosingBody ? `BODY ${currentBody} (PENUTUP VISUAL)` : `BODY ${currentBody}`;
     return `${slot.from}–${slot.to} DETIK — ${sectionLabel}\n${content}`;
   }).join('\n\n⸻\n');
+
+  const totalMaxWords = slotWords.reduce((sum, s) => sum + s.maxWords, 0);
 
   const sceneList = Array.from({ length: totalScenes }, (_, i) => {
     const n = i + 1;
@@ -444,6 +454,14 @@ GAYA VIDEO
 • Fast jump cuts sesuai ritme dialog
 • SFX: [efek suara spesifik dan natural, contoh: ${sfxExample}]
 Add TikTok style subtitles, promo graphics, and engaging overlay text.
+
+⸻
+ATURAN PANJANG DIALOG — WAJIB DIPATUHI:
+Patokan: ~3 kata per detik. Batas per section TIDAK BOLEH dilewati.
+${slotWords.map(s => `• ${s.from}–${s.to} dtk (${parseInt(s.to)-parseInt(s.from)} dtk) → maks ${s.maxWords} kata`).join('\n')}
+Total seluruh segmen: maks ${totalMaxWords} kata.
+CEK WAJIB sebelum output: hitung kata setiap section — jika melebihi batas, potong sampai sesuai.
+DILARANG menambah kalimat extra dengan alasan "lebih informatif" — padat dan singkat lebih baik.
 
 ⸻
 ALUR VIDEO
