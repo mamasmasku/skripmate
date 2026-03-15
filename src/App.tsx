@@ -471,8 +471,14 @@ export default function App() {
     }
   };
 
-  const extractSegments = (text: string): string[] =>
-    text.split(/(?=▶ SEGMEN)/).filter(s => s.trim().startsWith('▶ SEGMEN'));
+const extractSegments = (text: string): string[] => {
+  if (promptMode === 'bebas' && bebasSubMode === 'produk') {
+    // Split berdasarkan timestamp (0–3 DETIK, 3–7 DETIK dst)
+    const parts = text.split(/(?=\n⸻|\n0–|\n3–|\n7–|\n10–|\n13–)/).filter(s => s.trim().length > 20);
+    return parts.length > 1 ? parts : [text];
+  }
+  return text.split(/(?=▶ SEGMEN)/).filter(s => s.trim().startsWith('▶ SEGMEN'));
+};
 
   const getScenePreview = () => {
     const totalScenes = segmentDuration === '10' ? 5 : 7;
