@@ -378,7 +378,6 @@ export default function App() {
   const [totalDuration, setTotalDuration] = useState('45');
   const [contentCount, setContentCount] = useState('1');
   const [promptMode, setPromptMode] = useState<PromptModeKey>('bebas');
-  const [bebasSubMode, setBebasSubMode] = useState<'tiktokgo' | 'produk'>('tiktokgo');
   const [loadingText, setLoadingText] = useState('Menganalisa & membuat prompt...');
   const [generateError, setGenerateError] = useState('');
 
@@ -471,14 +470,8 @@ export default function App() {
     }
   };
 
-const extractSegments = (text: string): string[] => {
-  if (promptMode === 'bebas' && bebasSubMode === 'produk') {
-    // Split berdasarkan "Scene X" di awal baris
-    const parts = text.split(/(?=\nScene \d+\s)/i).map(s => s.trim()).filter(s => s.length > 20);
-    return parts.length > 1 ? parts : [text];
-  }
-  return text.split(/(?=▶ SEGMEN)/).filter(s => s.trim().startsWith('▶ SEGMEN'));
-};
+  const extractSegments = (text: string): string[] =>
+    text.split(/(?=▶ SEGMEN)/).filter(s => s.trim().startsWith('▶ SEGMEN'));
 
   const getScenePreview = () => {
     const totalScenes = segmentDuration === '10' ? 5 : 7;
@@ -922,90 +915,10 @@ bukan tentang tempat. Visual harus memperkuat pesan skrip, bukan terisolasi dari
   BUKAN hanya objek sendirian.
 - DILARANG adegan off-screen diisi deskripsi karakter dalam bentuk apapun.`;
 
-// ── MODE BEBAS PRODUK/UMUM ────────────────────────────────────────────
-const bebasProdukInstruction = `Kamu adalah AI pembuat Sora Video Prompt dalam Bahasa Indonesia untuk konten TikTok. Tugasmu membuat prompt video 15 detik yang sinematik, lengkap dengan scene bernomor, timestamp, dialog natural yang menarik, dan text overlay TikTok.
-
-Gunakan Google Search untuk mencari informasi detail tentang produk/konten yang diberikan user. Cari keunikan, keunggulan, harga promo, varian, dan poin menarik lainnya. Gunakan hasil riset untuk memperkaya dialog dan deskripsi visual.
-
-**ATURAN DIALOG WAJIB:**
-- Dialog HARUS natural, seperti orang asli bicara di TikTok — energik, antusias, tidak kaku
-- Dialog WAJIB mengandung pesan: harga lebih murah/hemat kalau klik tag lokasi di bawah dibanding datang/beli langsung
-- Hook (0–3 detik) WAJIB langsung menyebut keunggulan produk + info harga hemat lewat tag lokasi
-- CTA (13–15 detik) WAJIB ajak penonton klik tag lokasi di bawah video untuk dapat harga lebih hemat
-- Gunakan bahasa gaul TikTok yang natural: "serius deh", "beneran nih", "jujur ya", "guys", "kalian harus tau"
-- Dialog harus spesifik menyebut nama produk dan detailnya — JANGAN dialog generik
-
-**BANK HOOK WAJIB (pilih salah satu, modifikasi sesuai produk):**
-- "Serius deh ini, kalau kalian klik tag lokasi di bawah, harganya beda — lebih hemat dari beli langsung!"
-- "Jujur ya guys, yang beli langsung bayar lebih mahal. Klik lokasi bawah aja, sistemnya memang begitu."
-- "Beneran nih, aku baru tau kalau pesan lewat tag lokasi di bawah itu harganya jauh lebih murah!"
-- "Guys kalian harus tau ini — klik tag lokasi di bawah sebelum beli, harganya beda banget!"
-
-**FORMAT OUTPUT WAJIB — IKUTI 100%:**
-
-Deskripsikan produk/subjek secara visual spesifik berdasarkan hasil riset:
-- [detail visual produk spesifik — warna, bentuk, kemasan, logo]
-- [detail visual produk spesifik 2]
-- [detail visual produk spesifik 3]
-
-Background environment:
-- [suasana latar yang sesuai dengan produk/tempat]
-- [pencahayaan hangat/natural yang mendukung]
-
-Important rule: Tampilan produk/subjek harus konsisten di setiap scene. Produk harus terlihat menarik, berkualitas, dan menggiurkan/mengesankan.
-
-⸻ GAYA VIDEO
-- Smartphone vlog style
-- Close-up product shots
-- TikTok creator energy
-- Slight handheld movement
-- Macro detail of [nama produk] texture
-- Fast jump cuts
-Add TikTok style subtitles, promo graphics, and engaging overlay text.
-
-⸻ ALUR VIDEO
-Scene 1 Close-up produk/subjek yang menarik sebagai hook visual
-Scene 2 Detail spesifik produk yang paling unik/menarik
-Scene 3 Close-up tekstur/detail terbaik produk
-Scene 4 ${character ? character : 'Talent'} berinteraksi langsung dengan produk
-Scene 5 Ekspresi puas/excited setelah mencoba/melihat produk
-Scene 6 Menunjuk ke arah bawah untuk CTA tag lokasi
-
-⸻ SCRIPT VIDEO (15 DETIK)
-0–3 DETIK — HOOK
-${character ? character : 'Talent'} berkata: "[HOOK DARI BANK HOOK DI ATAS — modifikasi sesuai produk, sebutkan nama produk dan info harga hemat lewat tag lokasi]"
-Text di layar: 🔥 [NAMA PRODUK KAPITAL] [emoji relevan] [teks hook singkat]
-
-⸻ 3–7 DETIK — BODY
-Dialog: "[Jelaskan keunggulan utama produk secara spesifik — sebutkan detail hasil riset seperti rasa, tekstur, keunikan, varian]"
-Text overlay: [emoji] [poin keunggulan 1] [emoji] [poin keunggulan 2]
-
-⸻ 7–10 DETIK — BODY  
-Dialog: "[Lanjutkan keunggulan kedua — detail pengalaman menggunakan/mencoba produk yang bikin penasaran]"
-Text: [emoji] [detail 1] [emoji] [detail 2] [emoji] [detail 3]
-
-⸻ 10–13 DETIK — BODY
-Dialog: "[Highlight harga/promo/value terbaik — ini momen WOW yang bikin penonton tertarik beli]"
-Text besar: 🔥 [PROMO/HARGA KAPITAL] 💰 [detail harga/nilai]
-
-⸻ 13–15 DETIK — CTA
-Dialog: "[Ajakan tegas klik tag lokasi di bawah karena harga lebih hemat dibanding datang/beli langsung — spesifik dan natural]"
-Text: 📍 [TEKS CTA KAPITAL] 👇 Klik lokasi sekarang
-
-**ATURAN FORMAT TAMBAHAN:**
-- Dialog HARUS spesifik menyebut nama produk dan detail hasil riset — JANGAN generik
-- Setiap scene harus ada gerakan nyata, BUKAN foto diam atau slideshow
-- Text overlay harus singkat, padat, dan eye-catching dengan emoji yang relevan
-- DILARANG menampilkan layar HP dengan UI aplikasi apapun
-- Output LANGSUNG mulai dari deskripsi produk — tanpa intro atau penjelasan
-- Jika membuat lebih dari 1 konten, pisahkan setiap konten dengan baris berisi: *****
-- Setiap konten harus berdiri sendiri dan lengkap`;
-
-const systemInstruction =
-  promptMode === 'bebas' && bebasSubMode === 'produk' ? bebasProdukInstruction :
-  promptMode === 'bebas' ? bebasModeInstruction :
-  promptMode === 'rapi' ? rapiModeInstruction :
-  uraiModeInstruction;
+    const systemInstruction =
+      promptMode === 'bebas' ? bebasModeInstruction :
+      promptMode === 'rapi' ? rapiModeInstruction :
+      uraiModeInstruction;
 
     const userPrompt = promptMode === 'urai'
       ? `Urai skrip berikut menjadi prompt video Sora yang siap produksi:
@@ -1054,32 +967,26 @@ ${stylePerContent}`;
         .replace(/^\[([^\]]+)\],/gm, '$1,')
         .replace(/^\[([^\]]+)\]$/gm, '$1');
 
-const rawSplit = (promptMode === 'bebas' && bebasSubMode === 'produk')
-  ? responseText.split(/\*{5}/).map((p: string) => p.trim()).filter((p: string) => p.length > 50)
-  : responseText.split('|||CONTENT_BREAK|||').map((p: string) => p.trim()).filter((p: string) => p.includes('▶ SEGMEN'));
+      const generatedPrompts = responseText
+        .split('|||CONTENT_BREAK|||')
+        .map((p: string) => p.trim())
+        .filter((p: string) => p.includes('▶ SEGMEN'));
 
-const generatedPrompts = rawSplit;
-
-const formattedPrompts = generatedPrompts.map((prompt: string, i: number) => {
-  const styleId = styleDistribution[i] ?? activeStyles[0];
-  const styleTitle = getStyleTitle(styleId);
-  const totalSegments = (prompt.match(/▶ SEGMEN/g) || []).length;
-  const label = promptMode === 'urai' ? 'URAI SKRIP' 
-    : (promptMode === 'bebas' && bebasSubMode === 'produk') ? 'PRODUK / UMUM'
-    : styleTitle.toUpperCase();
-  const durasiInfo = (promptMode === 'bebas' && bebasSubMode === 'produk')
-    ? `Durasi: 15 detik`
-    : promptMode === 'urai'
-    ? `Durasi per Segmen: ${segmentDuration} detik (${totalSegments} segmen Sora)`
-    : `Durasi Target: ${totalDuration} detik (${totalSegments} segmen Sora)`;
-  return `═══════════════════════════════════════
+      const formattedPrompts = generatedPrompts.map((prompt: string, i: number) => {
+        const styleId = styleDistribution[i] ?? activeStyles[0];
+        const styleTitle = getStyleTitle(styleId);
+        const totalSegments = (prompt.match(/▶ SEGMEN/g) || []).length;
+        const label = promptMode === 'urai' ? 'URAI SKRIP' : styleTitle.toUpperCase();
+        return `═══════════════════════════════════════
 KONTEN #${i + 1} — ${label}
 ═══════════════════════════════════════
 Kategori: ${category}
-${durasiInfo}
+${promptMode === 'urai'
+  ? `Durasi per Segmen: ${segmentDuration} detik (${totalSegments} segmen Sora)`
+  : `Durasi Target: ${totalDuration} detik (${totalSegments} segmen Sora)`}
 
 ${prompt}`;
-});
+      });
 
       setPromptsByMode(prev => ({ ...prev, [promptMode]: formattedPrompts }));
 
@@ -1191,37 +1098,11 @@ ${prompt}`;
                   <ModeSelector promptMode={promptMode} setPromptMode={setPromptMode} modeAllowed={modeAllowed} />
 
                   {promptMode === 'bebas' && (
-  <div className="flex flex-col gap-3">
-    {/* Sub-mode selector */}
-    <div className="grid grid-cols-2 gap-2">
-      <button
-        onClick={() => setBebasSubMode('tiktokgo')}
-        className={`flex flex-col items-center gap-1 py-3 px-2 rounded-lg border text-sm font-semibold transition-all ${bebasSubMode === 'tiktokgo' ? 'bg-yellow-500 text-gray-900 border-yellow-500' : 'bg-gray-700/50 text-white border-gray-600 hover:bg-gray-700'}`}>
-        <span>🎯 TikTok GO</span>
-        <span className={`text-xs font-normal px-1.5 py-0.5 rounded-full ${bebasSubMode === 'tiktokgo' ? 'bg-gray-900/20 text-gray-800' : 'bg-purple-900/50 text-purple-400'}`}>Makanan · Hotel · Wisata</span>
-      </button>
-      <button
-        onClick={() => setBebasSubMode('produk')}
-        className={`flex flex-col items-center gap-1 py-3 px-2 rounded-lg border text-sm font-semibold transition-all ${bebasSubMode === 'produk' ? 'bg-yellow-500 text-gray-900 border-yellow-500' : 'bg-gray-700/50 text-white border-gray-600 hover:bg-gray-700'}`}>
-        <span>🛍️ Produk / Umum</span>
-        <span className={`text-xs font-normal px-1.5 py-0.5 rounded-full ${bebasSubMode === 'produk' ? 'bg-gray-900/20 text-gray-800' : 'bg-green-900/50 text-green-400'}`}>Affiliate · Konten Bebas</span>
-      </button>
-    </div>
-
-    {bebasSubMode === 'tiktokgo' && (
-      <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-lg px-4 py-3">
-        <p className="text-xs font-semibold text-yellow-400 mb-1">🚀 Cara Kerja Mode Ini</p>
-        <p className="text-xs text-zinc-400">Isi form → AI riset produk lewat Google lalu buat prompt video sinematik gaya TikTok GO. Output berbentuk paragraf naratif siap pakai di Sora. Seg 10 detik ideal 25 kata, seg 15 detik 37 kata.</p>
-      </div>
-    )}
-    {bebasSubMode === 'produk' && (
-      <div className="bg-green-900/20 border border-green-700/50 rounded-lg px-4 py-3">
-        <p className="text-xs font-semibold text-green-400 mb-1">🛍️ Cara Kerja Mode Ini</p>
-        <p className="text-xs text-zinc-400">Isi form → AI buat prompt video 15 detik lengkap dengan scene bernomor, timestamp, dialog, dan text overlay. Cocok untuk produk affiliate, review produk, atau konten umum. Tidak perlu riset Google.</p>
-      </div>
-    )}
-  </div>
-)}
+                    <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-lg px-4 py-3">
+                      <p className="text-xs font-semibold text-yellow-400 mb-1">🚀 Cara Kerja Mode Ini</p>
+                      <p className="text-xs text-zinc-400">Isi form → Isi form → AI riset produk lewat Google lalu langsung buat prompt video sinematik gaya TikTok GO. Output berbentuk paragraf naratif siap pakai di Sora, adegan di tentukan oleh sora, untuk panjang dialog atau narasi bisa di edit jika terlalu panjang, seg 10 detik ideal 25 kata, seg 15 detik 37 kata. cek jumlah kata bisa di mode urai bagian bawah di input narasi.</p>
+                    </div>
+                  )}
 
                   {promptMode === 'rapi' && (
                     <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="flex flex-col gap-6 mt-2 pt-4 border-t border-purple-800">
@@ -1451,10 +1332,7 @@ ${prompt}`;
                               return (
                                 <button key={segIdx} onClick={() => copySegment(prompt, index, segIdx)}
                                   className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-md border transition-all ${isCopied ? 'bg-yellow-500 text-gray-900 border-yellow-500' : 'bg-gray-800 text-zinc-300 border-gray-600 hover:bg-gray-700 hover:border-purple-500 hover:text-white'}`}>
-                                  {isCopied 
-  ? <><span>✓</span><span>{promptMode === 'bebas' && bebasSubMode === 'produk' ? `Scene ${segIdx + 1}` : `Segmen ${segIdx + 1}`} Tersalin!</span></>
-  : <><span>📋</span><span>Salin {promptMode === 'bebas' && bebasSubMode === 'produk' ? `Scene ${segIdx + 1}` : `Segmen ${segIdx + 1}`}</span></>
-}
+                                  {isCopied ? <><span>✓</span><span>Segmen {segIdx + 1} Tersalin!</span></> : <><span>📋</span><span>Salin Segmen {segIdx + 1}</span></>}
                                 </button>
                               );
                             })}
