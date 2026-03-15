@@ -378,6 +378,7 @@ export default function App() {
   const [totalDuration, setTotalDuration] = useState('45');
   const [contentCount, setContentCount] = useState('1');
   const [promptMode, setPromptMode] = useState<PromptModeKey>('bebas');
+  const [bebasSubMode, setBebasSubMode] = useState<'tiktokgo' | 'produk'>('tiktokgo');
   const [loadingText, setLoadingText] = useState('Menganalisa & membuat prompt...');
   const [generateError, setGenerateError] = useState('');
 
@@ -915,10 +916,76 @@ bukan tentang tempat. Visual harus memperkuat pesan skrip, bukan terisolasi dari
   BUKAN hanya objek sendirian.
 - DILARANG adegan off-screen diisi deskripsi karakter dalam bentuk apapun.`;
 
-    const systemInstruction =
-      promptMode === 'bebas' ? bebasModeInstruction :
-      promptMode === 'rapi' ? rapiModeInstruction :
-      uraiModeInstruction;
+// ── MODE BEBAS PRODUK/UMUM ────────────────────────────────────────────
+const bebasProdukInstruction = `Kamu adalah AI pembuat Sora Video Prompt dalam Bahasa Indonesia untuk konten produk affiliate dan konten umum. Tugasmu membuat prompt video 15 detik yang sinematik, lengkap dengan scene bernomor, timestamp, dialog natural, dan text overlay TikTok.
+
+Gunakan Google Search untuk mencari informasi detail tentang produk/konten yang diberikan user. Cari keunikan, keunggulan, harga promo, varian, dan poin menarik lainnya. Gunakan hasil riset untuk memperkaya dialog dan deskripsi visual.
+
+**FORMAT OUTPUT WAJIB — IKUTI 100%:**
+
+Deskripsikan produk/subjek secara visual:
+- [detail visual produk/subjek 1]
+- [detail visual produk/subjek 2]
+- [detail visual produk/subjek 3]
+
+Background environment:
+- [suasana latar yang sesuai]
+- [pencahayaan dan suasana]
+
+Important rule: Tampilan produk/subjek harus konsisten di setiap scene. Produk harus terlihat menarik, berkualitas, dan menggiurkan/mengesankan.
+
+⸻ GAYA VIDEO
+- Smartphone vlog style
+- Close-up product shots
+- TikTok creator energy
+- Slight handheld movement
+- Macro detail of [produk/subjek] texture
+- Fast jump cuts
+Add TikTok style subtitles, promo graphics, and engaging overlay text.
+
+⸻ ALUR VIDEO
+Scene 1 [deskripsi visual scene pembuka yang kuat]
+Scene 2 [deskripsi visual scene kedua]
+Scene 3 [deskripsi visual scene ketiga]
+Scene 4 [karakter berinteraksi dengan produk/subjek]
+Scene 5 [reaksi atau ekspresi karakter]
+Scene 6 [CTA — menunjuk ke lokasi/link di bawah]
+
+⸻ SCRIPT VIDEO (15 DETIK)
+0–3 DETIK — HOOK
+${character || 'Karakter'} berkata: "[hook yang menarik perhatian dalam 1-2 kalimat]"
+Text di layar: [emoji + teks hook singkat]
+
+⸻ 3–7 DETIK — BODY
+Dialog: "[penjelasan produk/konten poin utama 1]"
+Text overlay: [emoji + teks poin 1] [emoji + teks poin 2]
+
+⸻ 7–10 DETIK — BODY
+Dialog: "[penjelasan produk/konten poin utama 2]"
+Text: [emoji + teks] [emoji + teks] [emoji + teks]
+
+⸻ 10–13 DETIK — BODY
+Dialog: "[highlight utama — keunggulan/promo/fakta menarik]"
+Text besar: [emoji + TEKS KAPITAL MENARIK] [emoji + detail]
+
+⸻ 13–15 DETIK — CTA
+Dialog: "[ajakan klik tag lokasi/link di bawah video]"
+Text: 📍 [teks CTA] 👇 Klik lokasi sekarang
+
+**ATURAN PENTING:**
+- Dialog harus natural, seperti orang bicara di TikTok — tidak kaku
+- Setiap scene harus ada gerakan nyata, BUKAN foto diam atau slideshow
+- Text overlay harus singkat, padat, dan eye-catching
+- Hook harus langsung to the point dan bikin penasaran
+- CTA wajib ajak klik tag lokasi/link di bawah video
+- DILARANG menampilkan layar HP dengan UI aplikasi apapun
+- Output LANGSUNG mulai dari deskripsi produk — tanpa intro atau penjelasan`;
+
+const systemInstruction =
+  promptMode === 'bebas' && bebasSubMode === 'produk' ? bebasProdukInstruction :
+  promptMode === 'bebas' ? bebasModeInstruction :
+  promptMode === 'rapi' ? rapiModeInstruction :
+  uraiModeInstruction;
 
     const userPrompt = promptMode === 'urai'
       ? `Urai skrip berikut menjadi prompt video Sora yang siap produksi:
@@ -1098,11 +1165,37 @@ ${prompt}`;
                   <ModeSelector promptMode={promptMode} setPromptMode={setPromptMode} modeAllowed={modeAllowed} />
 
                   {promptMode === 'bebas' && (
-                    <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-lg px-4 py-3">
-                      <p className="text-xs font-semibold text-yellow-400 mb-1">🚀 Cara Kerja Mode Ini</p>
-                      <p className="text-xs text-zinc-400">Isi form → Isi form → AI riset produk lewat Google lalu langsung buat prompt video sinematik gaya TikTok GO. Output berbentuk paragraf naratif siap pakai di Sora, adegan di tentukan oleh sora, untuk panjang dialog atau narasi bisa di edit jika terlalu panjang, seg 10 detik ideal 25 kata, seg 15 detik 37 kata. cek jumlah kata bisa di mode urai bagian bawah di input narasi.</p>
-                    </div>
-                  )}
+  <div className="flex flex-col gap-3">
+    {/* Sub-mode selector */}
+    <div className="grid grid-cols-2 gap-2">
+      <button
+        onClick={() => setBebasSubMode('tiktokgo')}
+        className={`flex flex-col items-center gap-1 py-3 px-2 rounded-lg border text-sm font-semibold transition-all ${bebasSubMode === 'tiktokgo' ? 'bg-yellow-500 text-gray-900 border-yellow-500' : 'bg-gray-700/50 text-white border-gray-600 hover:bg-gray-700'}`}>
+        <span>🎯 TikTok GO</span>
+        <span className={`text-xs font-normal px-1.5 py-0.5 rounded-full ${bebasSubMode === 'tiktokgo' ? 'bg-gray-900/20 text-gray-800' : 'bg-purple-900/50 text-purple-400'}`}>Makanan · Hotel · Wisata</span>
+      </button>
+      <button
+        onClick={() => setBebasSubMode('produk')}
+        className={`flex flex-col items-center gap-1 py-3 px-2 rounded-lg border text-sm font-semibold transition-all ${bebasSubMode === 'produk' ? 'bg-yellow-500 text-gray-900 border-yellow-500' : 'bg-gray-700/50 text-white border-gray-600 hover:bg-gray-700'}`}>
+        <span>🛍️ Produk / Umum</span>
+        <span className={`text-xs font-normal px-1.5 py-0.5 rounded-full ${bebasSubMode === 'produk' ? 'bg-gray-900/20 text-gray-800' : 'bg-green-900/50 text-green-400'}`}>Affiliate · Konten Bebas</span>
+      </button>
+    </div>
+
+    {bebasSubMode === 'tiktokgo' && (
+      <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-lg px-4 py-3">
+        <p className="text-xs font-semibold text-yellow-400 mb-1">🚀 Cara Kerja Mode Ini</p>
+        <p className="text-xs text-zinc-400">Isi form → AI riset produk lewat Google lalu buat prompt video sinematik gaya TikTok GO. Output berbentuk paragraf naratif siap pakai di Sora. Seg 10 detik ideal 25 kata, seg 15 detik 37 kata.</p>
+      </div>
+    )}
+    {bebasSubMode === 'produk' && (
+      <div className="bg-green-900/20 border border-green-700/50 rounded-lg px-4 py-3">
+        <p className="text-xs font-semibold text-green-400 mb-1">🛍️ Cara Kerja Mode Ini</p>
+        <p className="text-xs text-zinc-400">Isi form → AI buat prompt video 15 detik lengkap dengan scene bernomor, timestamp, dialog, dan text overlay. Cocok untuk produk affiliate, review produk, atau konten umum. Tidak perlu riset Google.</p>
+      </div>
+    )}
+  </div>
+)}
 
                   {promptMode === 'rapi' && (
                     <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="flex flex-col gap-6 mt-2 pt-4 border-t border-purple-800">
