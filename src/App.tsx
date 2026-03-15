@@ -312,36 +312,41 @@ const buildRapiDenganTextSystemPrompt = (
     ? [
         { from: '0', to: '2', label: 'HOOK' },
         { from: '2', to: '5', label: 'BODY' },
-        { from: '5', to: '8', label: 'BODY' },
-        { from: '8', to: '10', label: 'CTA' },
+        { from: '5', to: '8', label: 'CTA' },
+        { from: '8', to: '10', label: 'BODY' },
       ]
     : [
         { from: '0', to: '3', label: 'HOOK' },
         { from: '3', to: '7', label: 'BODY' },
         { from: '7', to: '10', label: 'BODY' },
-        { from: '10', to: '13', label: 'BODY' },
-        { from: '13', to: '15', label: 'CTA' },
+        { from: '10', to: '13', label: 'CTA' },
+        { from: '13', to: '15', label: 'BODY' },
       ];
 
   const charLabel = character || 'Karakter';
 
   let bodyCount = 0;
+  let ctaSeen = false;
   const scriptSections = timeSlots.map((slot) => {
     const isCTA = slot.label === 'CTA';
     const isHook = slot.label === 'HOOK';
     if (slot.label === 'BODY') bodyCount++;
     const currentBody = bodyCount;
+    const isClosingBody = slot.label === 'BODY' && ctaSeen;
+    if (isCTA) ctaSeen = true;
 
     let content = '';
     if (isHook) {
       content = `Voice over: "[kalimat hook yang kuat sesuai gaya konten — mulai dari keunggulan/fakta mengejutkan produk]"\nText di layar: [emoji] [HOOK TEXT KAPITAL VIRAL] [emoji] [subtext menarik]`;
     } else if (isCTA) {
-      content = `${charLabel} on-screen berkata: "[kalimat 1 — keunggulan/promo terakhir yang memukau]. [kalimat 2 — ajakan klik tag lokasi di bawah video untuk dapatkan promo/harga hemat]."\nText: [emoji] [CTA TEXT KAPITAL] 📍 Klik lokasi sekarang`;
+      content = `${charLabel} on-screen berkata: "[kalimat 1 — keunggulan/promo utama yang memukau]. [kalimat 2 — ajakan klik tag lokasi di bawah video untuk dapatkan promo/harga hemat]."\nText: [emoji] [CTA TEXT KAPITAL] 📍 Klik lokasi sekarang`;
+    } else if (isClosingBody) {
+      content = `Voice over: "[kalimat penutup singkat yang memperkuat kesan produk — tanpa narasi baru, cukup 1 kalimat]"\nVisual: [close-up atau wide shot produk/tempat yang paling impactful — sebagai penutup sinematik]\nText overlay: [emoji] [tagline pendek] [emoji]`;
     } else {
       content = `Dialog: "[narasi body ${currentBody} dari hasil riset — detail keunggulan/fakta menarik produk]"\nText overlay: [emoji] [poin keunggulan singkat] [emoji] [detail menarik]`;
     }
 
-    const sectionLabel = isCTA || isHook ? slot.label : `BODY ${currentBody}`;
+    const sectionLabel = isCTA ? 'CTA' : isHook ? 'HOOK' : isClosingBody ? `BODY ${currentBody} (PENUTUP VISUAL)` : `BODY ${currentBody}`;
     return `${slot.from}–${slot.to} DETIK — ${sectionLabel}\n${content}`;
   }).join('\n\n⸻\n');
 
@@ -394,13 +399,14 @@ TAHAP 2 — TULIS SKRIP LENGKAP
 Berdasarkan hasil riset dan gaya konten yang ditentukan (${stylePerContent}), tulis narasi penuh dari HOOK hingga CTA sebelum memformat ke template.
 
 ATURAN KARAKTER — KERAS, TIDAK BOLEH DILANGGAR:
-- ${charLabel} HANYA MUNCUL di section CTA (scene terakhir) — ON-SCREEN saat berbicara
-- Semua scene sebelum CTA: 100% visual produk/tempat, TANPA karakter sama sekali
-- Di section HOOK dan BODY: dialog disampaikan sebagai Voice Over (suara terdengar, orangnya tidak terlihat di layar)
+- ${charLabel} HANYA MUNCUL di section CTA (sebelum body penutup) — ON-SCREEN saat berbicara
+- Section HOOK, BODY, dan BODY PENUTUP VISUAL: 100% visual produk/tempat, TANPA karakter sama sekali
+- Di section HOOK dan BODY: dialog disampaikan sebagai Voice Over (suara terdengar, orangnya tidak terlihat)
 - Di CTA: karakter muncul on-screen, bicara 2 kalimat:
   → Kalimat PERTAMA: keunggulan/promo produk yang memukau
   → Kalimat KEDUA (WAJIB): ajakan klik tag lokasi di bawah video untuk dapatkan promo/harga lebih hemat
   → DILARANG membalik urutan ini
+- Setelah CTA: video ditutup dengan BODY PENUTUP VISUAL — visual produk sinematik, voice over 1 kalimat singkat, TANPA karakter on-screen
 
 TAHAP 3 — FORMAT OUTPUT
 LANGSUNG mulai output dengan ▶ SEGMEN 1 tanpa komentar, penjelasan, atau intro apapun.
@@ -1656,15 +1662,15 @@ function DenganTextScenePreview({ segmentDuration }: { segmentDuration: string }
     ? [
         { label: 'HOOK', time: '0–2 dtk', type: 'voice-over', icon: '🎙️', color: 'bg-yellow-800/40 border-yellow-600 text-yellow-200', textIcon: '🔥' },
         { label: 'BODY 1', time: '2–5 dtk', type: 'voice-over', icon: '🎙️', color: 'bg-blue-800/40 border-blue-600 text-blue-200', textIcon: '📝' },
-        { label: 'BODY 2', time: '5–8 dtk', type: 'voice-over', icon: '🎙️', color: 'bg-blue-800/40 border-blue-600 text-blue-200', textIcon: '📝' },
-        { label: 'CTA', time: '8–10 dtk', type: 'on-screen', icon: '🎭', color: 'bg-purple-800/50 border-purple-400 text-purple-200', textIcon: '📍' },
+        { label: 'CTA', time: '5–8 dtk', type: 'on-screen', icon: '🎭', color: 'bg-purple-800/50 border-purple-400 text-purple-200', textIcon: '📍' },
+        { label: 'PENUTUP', time: '8–10 dtk', type: 'voice-over', icon: '🎙️', color: 'bg-gray-700/50 border-gray-500 text-zinc-300', textIcon: '🎬' },
       ]
     : [
         { label: 'HOOK', time: '0–3 dtk', type: 'voice-over', icon: '🎙️', color: 'bg-yellow-800/40 border-yellow-600 text-yellow-200', textIcon: '🔥' },
         { label: 'BODY 1', time: '3–7 dtk', type: 'voice-over', icon: '🎙️', color: 'bg-blue-800/40 border-blue-600 text-blue-200', textIcon: '📝' },
         { label: 'BODY 2', time: '7–10 dtk', type: 'voice-over', icon: '🎙️', color: 'bg-blue-800/40 border-blue-600 text-blue-200', textIcon: '📝' },
-        { label: 'BODY 3', time: '10–13 dtk', type: 'voice-over', icon: '🎙️', color: 'bg-blue-800/40 border-blue-600 text-blue-200', textIcon: '📝' },
-        { label: 'CTA', time: '13–15 dtk', type: 'on-screen', icon: '🎭', color: 'bg-purple-800/50 border-purple-400 text-purple-200', textIcon: '📍' },
+        { label: 'CTA', time: '10–13 dtk', type: 'on-screen', icon: '🎭', color: 'bg-purple-800/50 border-purple-400 text-purple-200', textIcon: '📍' },
+        { label: 'PENUTUP', time: '13–15 dtk', type: 'voice-over', icon: '🎙️', color: 'bg-gray-700/50 border-gray-500 text-zinc-300', textIcon: '🎬' },
       ];
 
   return (
