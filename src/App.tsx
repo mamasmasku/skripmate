@@ -1034,10 +1034,14 @@ ${stylePerContent}`;
         .replace(/^\[([^\]]+)\],/gm, '$1,')
         .replace(/^\[([^\]]+)\]$/gm, '$1');
 
-      const generatedPrompts = responseText
-        .split('|||CONTENT_BREAK|||')
-        .map((p: string) => p.trim())
-        .filter((p: string) => p.includes('▶ SEGMEN'));
+const generatedPrompts = responseText
+  .split('|||CONTENT_BREAK|||')
+  .map((p: string) => p.trim())
+  .filter((p: string) => 
+    promptMode === 'bebas' && bebasSubMode === 'produk'
+      ? p.length > 50
+      : p.includes('▶ SEGMEN')
+  );
 
       const formattedPrompts = generatedPrompts.map((prompt: string, i: number) => {
         const styleId = styleDistribution[i] ?? activeStyles[0];
