@@ -38,6 +38,13 @@ const characterAppearanceOptions = [
   { id: 'adegan-1-2-dan-penutup', label: 'Adegan 1, 2 & penutup segmen terakhir', description: 'On-screen di adegan 1 & 2 tiap segmen + adegan terakhir segmen terakhir' },
 ];
 
+const ctaTypeOptions = [
+  { id: 'affiliate-keranjang', label: '🛒 Affiliate — Keranjang Bawah', description: 'Ajakan beli lewat keranjang/tag di bawah video untuk harga lebih hemat' },
+  { id: 'affiliate-lokasi', label: '📍 Affiliate — Tag Lokasi', description: 'Ajakan klik tag lokasi di bawah untuk cek harga & promo terdekat' },
+  { id: 'umum-follow', label: '👆 Konten Umum — Follow', description: 'Ajakan follow akun untuk konten serupa' },
+  { id: 'umum-share', label: '🔁 Konten Umum — Share', description: 'Ajakan share video ke teman/keluarga' },
+];
+
 const dialogStrategyOptions = [
   { id: 'voice-over-penuh', label: 'Voice Over Penuh', description: 'Dialog berjalan di semua adegan sepanjang video. Karakter tidak perlu on-screen untuk bernarasi — suara VO tetap terdengar di atas visual produk.' },
   { id: 'hanya-on-screen', label: 'Dialog Hanya Saat On-Screen', description: 'Dialog hanya ada saat karakter muncul di layar. Adegan tanpa karakter = visual diam tanpa narasi.' },
@@ -304,6 +311,7 @@ const buildRapiDenganTextSystemPrompt = (
   segmentDuration: string,
   activeStyleGuide: string,
   stylePerContent: string,
+  ctaType: 'affiliate-lokasi' | 'affiliate-keranjang' | 'umum-follow' | 'umum-share' = 'affiliate-lokasi',
 ): string => {
   const is10s = segmentDuration === '10';
   const totalScenes = is10s ? 4 : 6;
@@ -323,6 +331,34 @@ const buildRapiDenganTextSystemPrompt = (
         { from: '13', to: '15', label: 'BODY' },
       ];
 
+  const ctaTemplates: Record<string, { kalimat1: string; kalimat2: string; text: string; aturan: string }> = {
+    'affiliate-lokasi': {
+      kalimat1: '[keunggulan/promo utama yang memukau]',
+      kalimat2: '[ajakan klik tag lokasi di bawah video untuk harga lebih hemat]',
+      text: '📍 Klik lokasi sekarang',
+      aturan: 'Kalimat 1 = keunggulan/promo produk. Kalimat 2 = ajakan klik TAG LOKASI di bawah video untuk dapat harga lebih hemat. WAJIB sebut "tag lokasi" atau "lokasi di bawah".',
+    },
+    'affiliate-keranjang': {
+      kalimat1: '[keunggulan/promo utama yang memukau]',
+      kalimat2: '[ajakan klik keranjang kuning/ikon keranjang di bawah video untuk beli lebih hemat]',
+      text: '🛒 Klik keranjang sekarang',
+      aturan: 'Kalimat 1 = keunggulan/promo produk. Kalimat 2 = ajakan klik KERANJANG KUNING atau ikon keranjang di bawah video. WAJIB sebut "keranjang" atau "keranjang di bawah". Jangan sebut lokasi.',
+    },
+    'umum-follow': {
+      kalimat1: '[rangkuman manfaat/nilai konten yang baru ditonton]',
+      kalimat2: '[ajakan follow akun untuk dapat konten serupa]',
+      text: '➕ Follow sekarang',
+      aturan: 'Kalimat 1 = rangkuman manfaat/insight konten. Kalimat 2 = ajakan FOLLOW akun untuk dapat konten bermanfaat serupa. JANGAN sebut beli/lokasi/keranjang.',
+    },
+    'umum-share': {
+      kalimat1: '[rangkuman manfaat/nilai konten yang baru ditonton]',
+      kalimat2: '[ajakan share ke teman/orang terdekat yang butuh info ini]',
+      text: '🔁 Share ke temanmu',
+      aturan: 'Kalimat 1 = rangkuman manfaat/insight konten. Kalimat 2 = ajakan SHARE ke teman atau orang yang butuh info ini. JANGAN sebut beli/lokasi/keranjang.',
+    },
+  };
+
+  const cta = ctaTemplates[ctaType];
   const charLabel = character || 'Karakter';
 
   const wordsPerSec = 3;
@@ -347,7 +383,7 @@ const buildRapiDenganTextSystemPrompt = (
       content = `Voice over (maks ${slot.maxWords} kata / ${durSec} detik): "[kalimat hook yang kuat sesuai gaya konten — mulai dari keunggulan/fakta mengejutkan produk]"\nText di layar: [emoji] [HOOK TEXT KAPITAL VIRAL] [emoji] [subtext menarik]`;
     } else if (isCTA) {
       const kataPerKalimat = Math.floor(slot.maxWords / 2);
-      content = `${charLabel} on-screen (maks ${slot.maxWords} kata total / ${durSec} detik — ~${kataPerKalimat} kata per kalimat):\nKalimat 1: "[keunggulan/promo utama — maks ${kataPerKalimat} kata]"\nKalimat 2: "[ajakan klik tag lokasi di bawah video — maks ${kataPerKalimat} kata]"\nText: [emoji] [CTA TEXT KAPITAL] 📍 Klik lokasi sekarang`;
+      content = `${charLabel} on-screen (maks ${slot.maxWords} kata total / ${durSec} detik — ~${kataPerKalimat} kata per kalimat):\nKalimat 1: "${cta.kalimat1} — maks ${kataPerKalimat} kata"\nKalimat 2: "${cta.kalimat2} — maks ${kataPerKalimat} kata"\nText: ${cta.text}`;
     } else if (isClosingBody) {
       content = `Voice over (maks ${slot.maxWords} kata / ${durSec} detik): "[1 kalimat penutup singkat yang memperkuat kesan produk]"\nVisual: [close-up atau wide shot produk/tempat yang paling impactful]\nText overlay: [emoji] [tagline pendek] [emoji]`;
     } else {
@@ -360,11 +396,19 @@ const buildRapiDenganTextSystemPrompt = (
 
   const totalMaxWords = slotWords.reduce((sum, s) => sum + s.maxWords, 0);
 
+  const ctaGesture = ctaType === 'affiliate-keranjang'
+    ? `${charLabel} [menunjuk ke bawah ke arah ikon keranjang, ekspresi antusias dan persuasif]`
+    : ctaType === 'affiliate-lokasi'
+    ? `${charLabel} [menunjuk ke arah tag lokasi di bawah, ekspresi antusias dan persuasif]`
+    : ctaType === 'umum-follow'
+    ? `${charLabel} [gestur ajakan follow — menunjuk ke layar/akun, ekspresi ramah dan engaging]`
+    : `${charLabel} [gestur ajakan share — ekspresi antusias, tangan membuka ke arah penonton]`;
+
   const sceneList = Array.from({ length: totalScenes }, (_, i) => {
     const n = i + 1;
-    const isCTA = n === totalScenes;
-    return `Scene ${n} ${isCTA
-      ? `${charLabel} [ekspresi dan gestur CTA — menunjuk ke arah tag lokasi di bawah, antusias dan persuasif]`
+    const isCTAScene = n === Math.ceil(totalScenes * 0.7); // CTA at ~70% of scenes
+    return `Scene ${n} ${isCTAScene
+      ? ctaGesture
       : `[Deskripsi visual spesifik scene ${n} — 100% fokus visual produk/tempat, TANPA karakter]`
     }`;
   }).join('\n');
@@ -413,8 +457,7 @@ ATURAN KARAKTER — KERAS, TIDAK BOLEH DILANGGAR:
 - Section HOOK, BODY, dan BODY PENUTUP VISUAL: 100% visual produk/tempat, TANPA karakter sama sekali
 - Di section HOOK dan BODY: dialog disampaikan sebagai Voice Over (suara terdengar, orangnya tidak terlihat)
 - Di CTA: karakter muncul on-screen, bicara 2 kalimat:
-  → Kalimat PERTAMA: keunggulan/promo produk yang memukau
-  → Kalimat KEDUA (WAJIB): ajakan klik tag lokasi di bawah video untuk dapatkan promo/harga lebih hemat
+  → ${cta.aturan}
   → DILARANG membalik urutan ini
 - Setelah CTA: video ditutup dengan BODY PENUTUP VISUAL — visual produk sinematik, voice over 1 kalimat singkat, TANPA karakter on-screen
 
@@ -583,6 +626,7 @@ export default function App() {
   const [contentCount, setContentCount] = useState('1');
   const [promptMode, setPromptMode] = useState<PromptModeKey>('bebas');
   const [rapiSubMode, setRapiSubMode] = useState<RapiSubModeKey>('tanpa-text');
+  const [ctaType, setCtaType] = useState('affiliate-lokasi');
   const [loadingText, setLoadingText] = useState('Menganalisa & membuat prompt...');
   const [generateError, setGenerateError] = useState('');
 
@@ -991,6 +1035,7 @@ LARANGAN VISUAL PLATFORM LAIN — WAJIB:
       segmentDuration,
       activeStyleGuide,
       stylePerContent,
+      ctaType,
     );
 
     // ── MODE URAI ─────────────────────────────────────────────────────
@@ -1307,6 +1352,7 @@ ${prompt}`;
                             </div>
                           </div>
                           {/* Scene preview for dengan-text mode */}
+                          <CtaTypeSelector value={ctaType} onChange={setCtaType} />
                           <DenganTextScenePreview segmentDuration={segmentDuration} />
                         </>
                       )}
@@ -1672,6 +1718,27 @@ function RapiSubModeSelector({ value, onChange }: { value: string; onChange: (v:
   );
 }
 
+// ── NEW: CTA Type selector ────────────────────────────────────────────────
+function CtaTypeSelector({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-sm font-semibold text-purple-300">🎯 Tipe CTA</p>
+      <div className="grid grid-cols-1 gap-2">
+        {ctaTypeOptions.map(opt => (
+          <button key={opt.id} onClick={() => onChange(opt.id)}
+            className={`flex items-start gap-3 text-left px-4 py-3 rounded-lg border transition-all ${value === opt.id ? 'bg-purple-700/50 border-purple-400 text-white' : 'bg-gray-900/40 border-gray-700 text-zinc-400 hover:border-purple-600 hover:text-zinc-200'}`}>
+            <span className={`mt-0.5 w-3.5 h-3.5 flex-shrink-0 rounded-full border-2 ${value === opt.id ? 'border-yellow-400 bg-yellow-400' : 'border-gray-500'}`} />
+            <span className="flex flex-col gap-0.5">
+              <span className="text-sm font-semibold">{opt.label}</span>
+              <span className="text-xs text-zinc-500">{opt.description}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── NEW: Scene preview for "Dengan Text" sub-mode ────────────────────────
 function DenganTextScenePreview({ segmentDuration }: { segmentDuration: string }) {
   const is10s = segmentDuration === '10';
@@ -1714,6 +1781,8 @@ function DenganTextScenePreview({ segmentDuration }: { segmentDuration: string }
     </div>
   );
 }
+
+
 
 function AppearanceSelector({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
