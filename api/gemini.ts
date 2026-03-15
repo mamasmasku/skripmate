@@ -12,14 +12,38 @@ export default async function handler(req: any, res: any) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const {
-    userPrompt,
-    systemInstruction,
-    temperature = 0.8,
-    useSearch   = false,   // ✅ akan dipakai di bawah
-    creditCost  = 1,
-    userApiKey,            // hanya untuk free user
-  } = req.body;
+const {
+  userPrompt,
+  systemInstruction,
+  temperature          = 0.8,
+  useSearch            = false,
+  userApiKey,
+  promptMode           = 'bebas',
+  totalDuration        = '45',
+  segmentDuration      = '15',
+  contentCount         = '1',
+  scriptInputWordCount = 0,
+} = req.body;
+
+// Hitung creditCost di server — tidak bisa dimanipulasi dari frontend
+const calcCost = (): number => {
+  if (promptMode === 'bebas' && (req.body.bebasSubMode === 'produk')) {
+    return Math.max(1, parseInt(contentCount));
+  }
+  if (promptMode === 'bebas' || promptMode === 'rapi') {
+    const segs = Math.ceil(parseInt(totalDuration) / parseInt(segmentDuration));
+    return segs * Math.max(1, parseInt(contentCount));
+  }
+  if (promptMode === 'urai') {
+    const maxWords = segmentDuration === '10' ? 35 : 48;
+    return Math.max(1, Math.ceil(scriptInputWordCount / maxWords));
+  }
+  if (promptMode === 'skrip-jualan') {
+    return Math.max(1, parseInt(contentCount));
+  }
+  return 1;
+};
+const creditCost = calcCost();
 
   if (!userPrompt || !systemInstruction)
     return res.status(400).json({ error: 'userPrompt dan systemInstruction wajib diisi' });
