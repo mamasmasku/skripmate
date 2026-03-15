@@ -953,7 +953,7 @@ Scene 6 [CTA — menunjuk ke lokasi/link di bawah]
 
 ⸻ SCRIPT VIDEO (15 DETIK)
 0–3 DETIK — HOOK
-${character || 'Karakter'} berkata: "[hook yang menarik perhatian dalam 1-2 kalimat]"
+${character ? character + ' berkata:' : 'Talent berkata:'} "[hook yang menarik perhatian dalam 1-2 kalimat]"
 Text di layar: [emoji + teks hook singkat]
 
 ⸻ 3–7 DETIK — BODY
@@ -979,7 +979,9 @@ Text: 📍 [teks CTA] 👇 Klik lokasi sekarang
 - Hook harus langsung to the point dan bikin penasaran
 - CTA wajib ajak klik tag lokasi/link di bawah video
 - DILARANG menampilkan layar HP dengan UI aplikasi apapun
-- Output LANGSUNG mulai dari deskripsi produk — tanpa intro atau penjelasan`;
+- Output LANGSUNG mulai dari deskripsi produk — tanpa intro atau penjelasan
+- Jika membuat lebih dari 1 konten, pisahkan setiap konten dengan baris berisi: *****
+- Setiap konten harus berdiri sendiri dan lengkap`;
 
 const systemInstruction =
   promptMode === 'bebas' && bebasSubMode === 'produk' ? bebasProdukInstruction :
