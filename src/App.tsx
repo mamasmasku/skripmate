@@ -1439,7 +1439,10 @@ ${prompt}`;
                               return (
                                 <button key={segIdx} onClick={() => copySegment(prompt, index, segIdx)}
                                   className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-md border transition-all ${isCopied ? 'bg-yellow-500 text-gray-900 border-yellow-500' : 'bg-gray-800 text-zinc-300 border-gray-600 hover:bg-gray-700 hover:border-purple-500 hover:text-white'}`}>
-                                  {isCopied ? <><span>✓</span><span>Segmen {segIdx + 1} Tersalin!</span></> : <><span>📋</span><span>Salin Segmen {segIdx + 1}</span></>}
+                                  {isCopied 
+  ? <><span>✓</span><span>{promptMode === 'bebas' && bebasSubMode === 'produk' ? `Scene ${segIdx + 1}` : `Segmen ${segIdx + 1}`} Tersalin!</span></>
+  : <><span>📋</span><span>Salin {promptMode === 'bebas' && bebasSubMode === 'produk' ? `Scene ${segIdx + 1}` : `Segmen ${segIdx + 1}`}</span></>
+}
                                 </button>
                               );
                             })}
