@@ -27,9 +27,6 @@ const {
 
 // Hitung creditCost di server — tidak bisa dimanipulasi dari frontend
 const calcCost = (): number => {
-  if (promptMode === 'bebas' && (req.body.bebasSubMode === 'produk')) {
-    return Math.max(1, parseInt(contentCount));
-  }
   if (promptMode === 'bebas' || promptMode === 'rapi') {
     const segs = Math.ceil(parseInt(totalDuration) / parseInt(segmentDuration));
     return segs * Math.max(1, parseInt(contentCount));
