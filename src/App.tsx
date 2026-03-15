@@ -18,7 +18,7 @@ import LoginScreen from './components/LoginScreen';
 import CreditDisplay from './components/CreditDisplay';
 import BuyCreditsModal from './components/BuyCreditsModal';
 import AdminPanel from './components/AdminPanel';
- 
+
 // ── Konstanta ─────────────────────────────────────────────────────────────
 const FREE_API_KEY_STORAGE = 'gemini_api_key_scriptmate';
 
@@ -297,8 +297,188 @@ ORANG / LATAR / FIGURAN:
 - Untuk orang di LATAR atau figuran (bukan karakter utama): tambahkan "pengunjung berkulit sawo matang", "orang Indonesia"
 - JANGAN ubah atau tambahkan deskripsi fisik pada karakter utama`;
 
+// ── NEW: Rapi Dengan Text Overlay system prompt builder ───────────────────
+const buildRapiDenganTextSystemPrompt = (
+  category: string,
+  character: string,
+  segmentDuration: string,
+  activeStyleGuide: string,
+  stylePerContent: string,
+): string => {
+  const is10s = segmentDuration === '10';
+  const totalScenes = is10s ? 4 : 6;
+
+  const timeSlots = is10s
+    ? [
+        { from: '0', to: '2', label: 'HOOK' },
+        { from: '2', to: '5', label: 'BODY' },
+        { from: '5', to: '8', label: 'BODY' },
+        { from: '8', to: '10', label: 'CTA' },
+      ]
+    : [
+        { from: '0', to: '3', label: 'HOOK' },
+        { from: '3', to: '7', label: 'BODY' },
+        { from: '7', to: '10', label: 'BODY' },
+        { from: '10', to: '13', label: 'BODY' },
+        { from: '13', to: '15', label: 'CTA' },
+      ];
+
+  const charLabel = character || 'Karakter';
+
+  let bodyCount = 0;
+  const scriptSections = timeSlots.map((slot) => {
+    const isCTA = slot.label === 'CTA';
+    const isHook = slot.label === 'HOOK';
+    if (slot.label === 'BODY') bodyCount++;
+    const currentBody = bodyCount;
+
+    let content = '';
+    if (isHook) {
+      content = `Voice over: "[kalimat hook yang kuat sesuai gaya konten — mulai dari keunggulan/fakta mengejutkan produk]"\nText di layar: [emoji] [HOOK TEXT KAPITAL VIRAL] [emoji] [subtext menarik]`;
+    } else if (isCTA) {
+      content = `${charLabel} on-screen berkata: "[kalimat 1 — keunggulan/promo terakhir yang memukau]. [kalimat 2 — ajakan klik tag lokasi di bawah video untuk dapatkan promo/harga hemat]."\nText: [emoji] [CTA TEXT KAPITAL] 📍 Klik lokasi sekarang`;
+    } else {
+      content = `Dialog: "[narasi body ${currentBody} dari hasil riset — detail keunggulan/fakta menarik produk]"\nText overlay: [emoji] [poin keunggulan singkat] [emoji] [detail menarik]`;
+    }
+
+    const sectionLabel = isCTA || isHook ? slot.label : `BODY ${currentBody}`;
+    return `${slot.from}–${slot.to} DETIK — ${sectionLabel}\n${content}`;
+  }).join('\n\n⸻\n');
+
+  const sceneList = Array.from({ length: totalScenes }, (_, i) => {
+    const n = i + 1;
+    const isCTA = n === totalScenes;
+    return `Scene ${n} ${isCTA
+      ? `${charLabel} [ekspresi dan gestur CTA — menunjuk ke arah tag lokasi di bawah, antusias dan persuasif]`
+      : `[Deskripsi visual spesifik scene ${n} — 100% fokus visual produk/tempat, TANPA karakter]`
+    }`;
+  }).join('\n');
+
+  const categoryVisual = category === 'Hotel'
+    ? 'fresh, premium, dan elegan'
+    : category === 'Tempat Wisata'
+    ? 'hidup, menarik, dan mengundang rasa ingin berkunjung'
+    : category === 'Produk Jualan'
+    ? 'menarik, berkualitas, dan menggiurkan untuk dibeli'
+    : 'segar, menggiurkan, dan appetizing';
+
+  const sfxExample = category === 'Hotel'
+    ? 'ambient hotel lobby, soft music, door opening sound'
+    : category === 'Tempat Wisata'
+    ? 'ambient crowd noise, nature sounds, excited atmosphere'
+    : category === 'Produk Jualan'
+    ? 'satisfying unboxing sound, product click, upbeat energy'
+    : 'sizzle sound / crunchy bite / liquid pour, ambient store noise';
+
+  const categorySubject = category === 'Hotel'
+    ? 'room & facility'
+    : category === 'Tempat Wisata'
+    ? 'location & attraction'
+    : 'produk & detail';
+
+  return `Kamu adalah AI Scriptwriter & Creative Director untuk konten TikTok viral dalam Bahasa Indonesia, DIBEKALI KEMAMPUAN PENCARIAN GOOGLE.
+
+TUGAS: Buat prompt video TikTok produksi profesional — lengkap dengan visual brief, gaya video, alur scene, dan skrip ber-time-code dengan text overlay TikTok style.
+
+**ALUR KERJA WAJIB — 3 TAHAP:**
+
+TAHAP 1 — RISET MENDALAM
+Gunakan Google Search untuk mencari info tentang nama & deskripsi yang diberikan. Cari:
+- Detail visual produk: warna, bentuk, kemasan, logo, merek
+- Keunikan, menu/varian, harga/promo terkini
+- Suasana tempat/toko
+- Target pasar dan momen konsumsi ideal
+JANGAN mulai menulis output sebelum selesai riset.
+
+TAHAP 2 — TULIS SKRIP LENGKAP
+Berdasarkan hasil riset dan gaya konten yang ditentukan (${stylePerContent}), tulis narasi penuh dari HOOK hingga CTA sebelum memformat ke template.
+
+ATURAN KARAKTER — KERAS, TIDAK BOLEH DILANGGAR:
+- ${charLabel} HANYA MUNCUL di section CTA (scene terakhir) — ON-SCREEN saat berbicara
+- Semua scene sebelum CTA: 100% visual produk/tempat, TANPA karakter sama sekali
+- Di section HOOK dan BODY: dialog disampaikan sebagai Voice Over (suara terdengar, orangnya tidak terlihat di layar)
+- Di CTA: karakter muncul on-screen, bicara 2 kalimat:
+  → Kalimat PERTAMA: keunggulan/promo produk yang memukau
+  → Kalimat KEDUA (WAJIB): ajakan klik tag lokasi di bawah video untuk dapatkan promo/harga lebih hemat
+  → DILARANG membalik urutan ini
+
+TAHAP 3 — FORMAT OUTPUT
+LANGSUNG mulai output dengan ▶ SEGMEN 1 tanpa komentar, penjelasan, atau intro apapun.
+
+===
+
+**PANDUAN GAYA KONTEN:**
+${activeStyleGuide}
+
+===
+
+**FORMAT OUTPUT PER SEGMEN — IKUTI 100%:**
+
+▶ SEGMEN [N] ([X] detik)
+
+[Nama produk/tempat] [deskripsi visual lengkap hasil riset — 1-2 kalimat deskriptif dan spesifik]
+• [Detail visual 1: kemasan/logo/warna/merek yang khas — deskripsi spesifik dari hasil riset]
+• [Detail visual 2: tekstur/bentuk/penampilan yang menarik — detail menggiurkan/premium]
+• [Detail visual 3: hal khas yang membedakan dari kompetitor — unik dan memorable]
+
+LATAR BELAKANG:
+• [Lingkungan/suasana spesifik dari hasil riset: nama toko/outlet, tipe interior, ciri khas]
+• [Elemen dekorasi, properti, atau display khas tempat]
+• [Jenis pencahayaan: warm indoor / natural daylight / neon / golden hour / dll]
+
+ATURAN PENTING: Bentuk, warna, kemasan, dan logo produk HARUS identik sepanjang video. Jangan ubah tampilan produk. Produk harus tampil ${categoryVisual}.
+
+⸻
+GAYA VIDEO
+• [Video style utama sesuai gaya konten: Smartphone vlog style / Cinematic / Raw UGC / Creator style / dll]
+• Close-up ${categorySubject} shots
+• TikTok creator energy — energik dan autentik
+• Slight handheld movement — terasa natural dan spontan
+• Macro detail [subjek produk/tempat] texture dan close-up impactful
+• Fast jump cuts sesuai ritme dialog
+• SFX: [efek suara spesifik dan natural, contoh: ${sfxExample}]
+Add TikTok style subtitles, promo graphics, and engaging overlay text.
+
+⸻
+ALUR VIDEO
+${sceneList}
+
+⸻
+SCRIPT VIDEO (${segmentDuration} DETIK)
+
+${scriptSections}
+
+--
+
+[segmen berikutnya jika ada]
+
+===
+
+**ATURAN FORMAT WAJIB:**
+- Awali tiap segmen dengan '▶ SEGMEN [N] ([X] detik)'.
+- Pisahkan segmen dengan '--', pisahkan multi-konten dengan '*****'.
+- Hitung segmen WAJIB: Total Durasi ÷ Durasi per Segmen = jumlah segmen. DILARANG output kurang dari jumlah yang dihitung.
+- DILARANG tanda kurung [ ] di output akhir — isi SEMUA placeholder dengan konten nyata hasil riset.
+- DILARANG penjelasan/komentar apapun sebelum atau sesudah output. Langsung mulai ▶ SEGMEN 1.
+- DILARANG menuliskan kata "Karakter" sebelum nama/handle karakter.
+- CTA dialog: kalimat PERTAMA = keunggulan/promo, kalimat KEDUA = ajakan klik tag lokasi bawah video. DILARANG membalik urutan.
+- Text overlay: gunakan emoji relevan + teks KAPITAL singkat yang viral dan eye-catching.
+- SFX: deskripsi suara WAJIB spesifik (bukan hanya "SFX ada" — tulis bunyi spesifik apa yang terdengar).
+- Jika membuat lebih dari 1 konten: SETIAP konten wajib menggunakan gaya konten berbeda sesuai distribusi, hook BERBEDA di setiap konten.
+
+${INDONESIAN_CONTEXT_RULE}
+
+LARANGAN VISUAL PLATFORM LAIN — WAJIB:
+- DILARANG menampilkan layar HP yang menunjukkan aplikasi order (GoFood, GrabFood, Shopee Food, Tokopedia, Shopee, TikTok Shop, dll)
+- DILARANG menampilkan UI/interface aplikasi apapun di layar HP atau tablet
+- DILARANG menampilkan struk digital, notifikasi order, atau konfirmasi pembelian dari platform lain
+- Jika perlu tunjukkan "cara order": tangan mengetuk udara, gestur menunjuk ke bawah, atau karakter bicara ke kamera — TANPA layar HP
+- Jika perlu tunjukkan "harga lebih murah": visual produk dengan label harga fisik, karakter memegang uang Rupiah, atau gestur jempol ke bawah — TANPA layar HP`;
+};
+
 // ── Tipe ──────────────────────────────────────────────────────────────────
 type PromptModeKey = 'bebas' | 'rapi' | 'urai' | 'skrip-jualan';
+type RapiSubModeKey = 'tanpa-text' | 'dengan-text';
 
 // ── Modal ganti password ──────────────────────────────────────────────────
 function ChangePwModal({ token, onClose }: { token: string; onClose: () => void }) {
@@ -378,6 +558,7 @@ export default function App() {
   const [totalDuration, setTotalDuration] = useState('45');
   const [contentCount, setContentCount] = useState('1');
   const [promptMode, setPromptMode] = useState<PromptModeKey>('bebas');
+  const [rapiSubMode, setRapiSubMode] = useState<RapiSubModeKey>('tanpa-text');
   const [loadingText, setLoadingText] = useState('Menganalisa & membuat prompt...');
   const [generateError, setGenerateError] = useState('');
 
@@ -411,17 +592,21 @@ export default function App() {
 
   const loadingMessages = ['Mencari ide-ide sinematik...', 'Meracik hook yang menarik...', 'Mengembangkan detail visual...', 'Menyusun narasi yang kuat...', 'Finalisasi prompt video...'];
   const uraiLoadingMessages = ['Membaca skrip...', 'Menentukan jumlah segmen...', 'Membagi dialog ke setiap adegan...', 'Merancang visual per adegan...', 'Finalisasi prompt Sora...'];
+  const rapiDenganTextLoadingMessages = ['Riset produk lewat Google...', 'Merancang visual brief...', 'Menyusun alur scene...', 'Menulis skrip & text overlay...', 'Finalisasi prompt TikTok...'];
   const skripLoadingMessages = ['Memilih hook yang tepat...', 'Menyusun rumus storytelling...', 'Merangkai narasi produk...', 'Menulis caption & hashtag...', 'Finalisasi skrip...'];
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
     if (isLoading) {
-      const messages = promptMode === 'urai' ? uraiLoadingMessages : loadingMessages;
+      const messages =
+        promptMode === 'urai' ? uraiLoadingMessages
+        : (promptMode === 'rapi' && rapiSubMode === 'dengan-text') ? rapiDenganTextLoadingMessages
+        : loadingMessages;
       let i = 0; setLoadingText(messages[0]);
       interval = setInterval(() => { i = (i + 1) % messages.length; setLoadingText(messages[i]); }, 1500);
     }
     return () => clearInterval(interval);
-  }, [isLoading, promptMode]);
+  }, [isLoading, promptMode, rapiSubMode]);
 
   const toggleStyle = (styleId: string) => {
     setActiveStyles(prev => {
@@ -447,7 +632,7 @@ export default function App() {
   const handlePromptChange = (newText: string, index: number) => {
     const updated = [...prompts]; updated[index] = newText;
     setPromptsByMode(prev => ({ ...prev, [promptMode]: updated }));
-    if (promptMode === 'rapi' || promptMode === 'urai' || promptMode === 'bebas') {
+    if ((promptMode === 'rapi' && rapiSubMode === 'tanpa-text') || promptMode === 'urai' || promptMode === 'bebas') {
       const updatedWarnings = [...promptWarnings];
       updatedWarnings[index] = validateDialogLength(newText, segmentDuration, promptMode === 'urai');
       setWarningsByMode(prev => ({ ...prev, [promptMode]: updatedWarnings }));
@@ -487,6 +672,15 @@ export default function App() {
       const n = i + 1;
       const onScreen = isOnScreen(n);
       return { n, onScreen, hasDialog: dialogStrategy === 'voice-over-penuh' ? true : onScreen };
+    });
+  };
+
+  const getDenganTextScenePreview = () => {
+    const totalScenes = segmentDuration === '10' ? 4 : 6;
+    return Array.from({ length: totalScenes }, (_, i) => {
+      const n = i + 1;
+      const isCTA = n === totalScenes;
+      return { n, onScreen: isCTA, hasDialog: true, isCTA };
     });
   };
 
@@ -556,16 +750,15 @@ export default function App() {
     const stylePerContent = styleDistribution.map((s, i) => `Konten ${i + 1}: ${getStyleTitle(s)}`).join('\n');
 
     const isUraiMode = promptMode === 'urai';
+    const isDenganTextMode = promptMode === 'rapi' && rapiSubMode === 'dengan-text';
     const totalScenes = isUraiMode ? (segmentDuration === '10' ? 5 : 8) : (segmentDuration === '10' ? 5 : 7);
     const maxWords = isUraiMode ? (segmentDuration === '10' ? 35 : 48) : (segmentDuration === '10' ? 28 : 40);
 
     const creditCost = calcCreditCost(promptMode, totalDuration, segmentDuration, contentCount, scriptInput);
 
-    const characterRule = buildCharacterRule(characterAppearance, totalScenes);
-    const dialogRule = buildDialogRule(dialogStrategy, characterAppearance, segmentDuration, maxWords, totalScenes);
     const activeStyleGuide = buildStyleGuide(activeStyles);
 
-    // ── MODE BEBAS (system prompt dari original) ──────────────────────
+    // ── MODE BEBAS ────────────────────────────────────────────────────
     const bebasModeInstruction = `Kamu adalah AI pembuat Sora Video Prompt Mamas dalam Bahasa Indonesia yang dibekali kemampuan pencarian Google. Tugas utamamu adalah MENCARI INFORMASI tentang input user, lalu membuat prompt video yang SANGAT SPESIFIK, deskriptif, dan sinematik berdasarkan format dan aturan baru di bawah ini.
 
 **PROSES BERPIKIR (WAJIB DIIKUTI):**
@@ -659,8 +852,11 @@ TEMPAT WISATA / TIKET
 
 ===`;
 
-    // ── MODE RAPI (system prompt dari original) ───────────────────────
-    const rapiModeInstruction = `Kamu adalah AI Scriptwriter dan Visual Director untuk konten review TikTok dalam Bahasa Indonesia, DIBEKALI KEMAMPUAN PENCARIAN GOOGLE. Cari info dulu, tulis skrip penuh sebagai paragraf mengalir, lalu bagi ke segmen dan adegan.
+    // ── MODE RAPI (tanpa text) ────────────────────────────────────────
+    const characterRule = buildCharacterRule(characterAppearance, totalScenes);
+    const dialogRule = buildDialogRule(dialogStrategy, characterAppearance, segmentDuration, maxWords, totalScenes);
+
+    const rapiTanpaTextInstruction = `Kamu adalah AI Scriptwriter dan Visual Director untuk konten review TikTok dalam Bahasa Indonesia, DIBEKALI KEMAMPUAN PENCARIAN GOOGLE. Cari info dulu, tulis skrip penuh sebagai paragraf mengalir, lalu bagi ke segmen dan adegan.
 
 **ALUR KERJA WAJIB — 4 TAHAP:**
 
@@ -680,7 +876,7 @@ PANDUAN PANJANG SKRIP BERDASARKAN TOTAL DURASI:
 - KALIMAT PERTAMA WAJIB mengandung pesan inti: lewat tag lokasi di bawah harganya lebih hemat dari datang langsung
 - Hitung dulu: (Total Detik ÷ Durasi Segmen) × Maks Kata Per Segmen = target kata skrip
 - Tulis skrip hingga MENDEKATI target kata — JANGAN berhenti di setengahnya
-- Kalimat sambung menyambung natural, tidak ada label section (🎣 HOOK:, 📖 STORY:, dsb)
+- Kalimat sambung menyambung natural, tidak ada label section
 - JANGAN langsung ke format segmen — selesaikan paragraf skrip penuh dulu
 
 RUMUS ALUR NARASI (pilih salah satu sesuai gaya konten):
@@ -691,19 +887,9 @@ RUMUS ALUR NARASI (pilih salah satu sesuai gaya konten):
 
 TAHAP 3 — BAGI SKRIP KE SEGMEN & ADEGAN
 - Hitung segmen WAJIB: Total Durasi ÷ Durasi per Segmen
-  Contoh: 30 detik ÷ 15 detik = 2 segmen → WAJIB buat 2 segmen terpisah
-  Contoh: 45 detik ÷ 15 detik = 3 segmen → WAJIB buat 3 segmen terpisah
 - SETIAP segmen maksimal ${maxWords} kata dialog — DILARANG melebihi batas ini
 - DILARANG menggabungkan semua dialog ke 1 segmen meskipun skrip terasa menyatu
-- Potong skrip ke segmen di jeda natural (koma, titik, jeda napas) — JANGAN potong tengah kalimat
-- Setiap segmen harus berdiri sendiri sebagai video Sora yang terpisah
-- CEK WAJIB FINAL sebelum output:
-  1. Hitung: Total Durasi ÷ Durasi per Segmen = jumlah segmen WAJIB
-     Contoh: 30 ÷ 15 = 2 → output WAJIB ada ▶ SEGMEN 1 DAN ▶ SEGMEN 2
-     Contoh: 45 ÷ 15 = 3 → output WAJIB ada ▶ SEGMEN 1, 2, DAN 3
-  2. Hitung berapa kali '▶ SEGMEN' muncul di output yang sudah ditulis
-  3. Jika jumlahnya KURANG → WAJIB tambahkan segmen yang kurang SEBELUM selesai
-  4. DILARANG output hanya 1 segmen jika Total Durasi > Durasi per Segmen
+- CEK WAJIB FINAL: hitung segmen dari total ÷ durasi, WAJIB ada segmen sebanyak itu
 
 TAHAP 4 — FORMAT OUTPUT
 LANGSUNG mulai output dengan ▶ SEGMEN 1 tanpa penjelasan, tanpa intro, tanpa komentar apapun.
@@ -755,12 +941,9 @@ LARANGAN VISUAL PLATFORM LAIN — WAJIB:
 - DILARANG menampilkan UI/interface aplikasi apapun di layar HP atau tablet
 - DILARANG menampilkan struk digital, notifikasi order, atau konfirmasi pembelian dari aplikasi lain
 - DILARANG visual tangan mengetuk/scroll layar HP yang menampilkan platform lain
-- Jika perlu menunjukkan "cara order", gunakan: tangan mengetuk udara, gestur menunjuk ke bawah, atau karakter berbicara langsung ke kamera — TANPA memperlihatkan layar HP
-- Jika perlu menunjukkan "harga lebih murah", gunakan: visual produk dengan label harga fisik, karakter memegang uang Rupiah, atau gestur jempol ke bawah (harga turun) — TANPA layar HP.
 
 - ATURAN VISUAL — WAJIB FOKUS KE OBJEK REVIEW:
   Mayoritas adegan (minimal ${totalScenes === 5 ? '4' : '5'} dari ${totalScenes} adegan per segmen) HARUS menampilkan visual objek review, bukan karakter.
-  Karakter hanya muncul di adegan on-screen yang sudah ditentukan — adegan lainnya WAJIB fokus ke visual produk/tempat.
 
   UNTUK REVIEW MAKANAN/MINUMAN:
   Prioritaskan visual: wide shot hidangan lengkap di meja dengan suasana outlet terlihat, medium shot
@@ -775,35 +958,22 @@ LARANGAN VISUAL PLATFORM LAIN — WAJIB:
   UNTUK REVIEW TEMPAT WISATA:
   Prioritaskan visual: wide shot panorama lokasi dengan landmark dan pengunjung terlihat, medium shot
   spot ikonik dengan suasana sekitar, wide shot area berbeda yang menarik, medium shot aktivitas
-  atau keunikan tempat dalam konteks lingkungan penuh.
-  KOMPOSISI SHOT — ATURAN KETAT:
-  - DOMINASI wide shot dan medium shot — minimal ${totalScenes === 5 ? '4' : '5'} dari ${totalScenes} adegan harus wide atau medium
-  - Close-up MAKSIMAL 1 kali per segmen, hanya untuk detail paling impactful
-  - Wide shot WAJIB memperlihatkan objek review SEKALIGUS suasana/lingkungan sekitarnya
-  - Medium shot juga harus memperlihatkan konteks tempat — produk tidak boleh terisolasi dari suasana
-  - DILARANG close-up yang memotong konteks tempat/suasana dari frame
+  atau keunikan tempat dalam konteks lingkungan penuh.`;
 
-  URUTAN SHOT YANG DISARANKAN per segmen:
-  ${totalScenes === 5 ? `(10 detik = 5 adegan):
-  wide shot suasana tempat lengkap → medium shot produk dengan latar terlihat →
-  medium shot sudut berbeda dengan suasana → close-up detail impactful (1x) →
-  wide shot/medium shot penutup suasana keseluruhan.` 
-  : `(15 detik = 7 adegan):
-  wide shot suasana outlet/tempat lengkap → medium shot produk dengan latar tempat terlihat →
-  medium shot sudut berbeda dengan suasana → wide shot area lain yang menarik →
-  medium shot detail produk dengan konteks → close-up detail impactful (1x saja) →
-  wide shot/medium shot penutup suasana keseluruhan.`}
+    // ── MODE RAPI (dengan text) ───────────────────────────────────────
+    const rapiDenganTextInstruction = buildRapiDenganTextSystemPrompt(
+      category,
+      character,
+      segmentDuration,
+      activeStyleGuide,
+      stylePerContent,
+    );
 
-  PRINSIP UTAMA: Setiap shot harus menjawab "terlihat seperti apa tempatnya?" — penonton
-  harus bisa membayangkan suasana berada di sana, bukan hanya melihat produk terisolasi.
-
-  DILARANG: close-up yang memotong konteks tempat/suasana dari frame.
-  DILARANG: adegan off-screen diisi deskripsi karakter dalam bentuk apapun.
-  DILARANG: mendominasi segmen dengan shot karakter lebih dari 2 adegan per segmen.
-  `;
-
-    // ── MODE URAI (system prompt dari original) ───────────────────────
-    const uraiDialogRule = buildUraiDialogRule(characterAppearance, segmentDuration, maxWords, totalScenes);
+    // ── MODE URAI ─────────────────────────────────────────────────────
+    const uraiTotalScenes = segmentDuration === '10' ? 5 : 8;
+    const uraiMaxWords = segmentDuration === '10' ? 35 : 48;
+    const uraiDialogRule = buildUraiDialogRule(characterAppearance, segmentDuration, uraiMaxWords, uraiTotalScenes);
+    const uraiCharacterRule = buildCharacterRule(characterAppearance, uraiTotalScenes);
 
     const uraiVisualGuide = category === 'Makanan/Minuman'
       ? `UNTUK REVIEW MAKANAN/MINUMAN:
@@ -845,7 +1015,7 @@ ${uraiDialogRule}
 
 ===
 
-${characterRule}
+${uraiCharacterRule}
 
 ===
 
@@ -871,53 +1041,25 @@ ${INDONESIAN_CONTEXT_RULE}
 **ATURAN FORMAT WAJIB:**
 - Awali tiap segmen dengan '▶ SEGMEN [N] ([X] detik)'.
 - Pisahkan segmen dengan '--'.
-- Jika ada beberapa konten, pisahkan dengan '*****'.
 - DILARANG tanda kurung [ ] dalam output deskripsi visual.
 - DILARANG penjelasan/komentar apapun sebelum atau sesudah output. Langsung mulai dengan '▶ SEGMEN 1'.
 - DILARANG menuliskan kata "Karakter" sebelum nama/handle karakter. Langsung tulis nama/handle-nya.
 - DILARANG mengubah kata-kata dari skrip asli. Hanya boleh memotong di jeda natural.
 
 **ATURAN VISUAL PER ADEGAN:**
-- Dominasi wide shot dan medium shot — minimal 5 dari 8 adegan harus wide atau medium.
-- Close-up MAKSIMAL 1 kali per segmen, hanya untuk detail paling impactful.
-- Wide shot WAJIB memperlihatkan objek utama SEKALIGUS konteks/lingkungan sekitarnya —
-  contoh makanan: "wide shot meja makan dengan hidangan lengkap, suasana outlet ramai di latar"
-  contoh produk: "wide shot jaket dipakai model, suasana ruangan lifestyle terlihat di latar"
-  contoh umum: "wide shot subjek utama dengan lingkungan relevan terlihat di sekitarnya"
-- Medium shot juga harus memperlihatkan konteks —
-  contoh makanan: "medium shot produk di piring dengan dekorasi warung terlihat di sekitarnya"
-  contoh produk: "medium shot produk dipegang dengan latar ruangan/outdoor yang relevan"
-  contoh umum: "medium shot elemen utama konten dengan konteks lingkungan yang sesuai topik"
+- Dominasi wide shot dan medium shot.
+- Close-up MAKSIMAL 1 kali per segmen.
 
 LARANGAN VISUAL PLATFORM LAIN — WAJIB:
-- DILARANG menampilkan layar HP yang menunjukkan aplikasi order (GoFood, GrabFood, Shopee Food, Tokopedia, Shopee, TikTok Shop, dll)
+- DILARANG menampilkan layar HP yang menunjukkan aplikasi order apapun
 - DILARANG menampilkan UI/interface aplikasi apapun di layar HP atau tablet
-- DILARANG menampilkan struk digital, notifikasi order, atau konfirmasi pembelian dari aplikasi lain
-- DILARANG visual tangan mengetuk/scroll layar HP yang menampilkan platform lain
-- Jika perlu menunjukkan "cara order", gunakan: tangan mengetuk udara, gestur menunjuk ke bawah, atau karakter berbicara langsung ke kamera — TANPA memperlihatkan layar HP
-- Jika perlu menunjukkan "harga lebih murah", gunakan: visual produk dengan label harga fisik, karakter memegang uang Rupiah, atau gestur jempol ke bawah (harga turun) — TANPA layar HP.
 
 PANDUAN VISUAL BERDASARKAN KATEGORI:
-${uraiVisualGuide}
-
-URUTAN SHOT YANG DISARANKAN per segmen (${totalScenes} adegan):
-wide shot suasana tempat/konteks lengkap → medium shot elemen utama dengan latar terlihat →
-medium shot sudut berbeda → wide shot area menarik lainnya →
-medium shot detail dengan konteks → close-up impactful (1x) →
-medium shot suasana → wide shot penutup keseluruhan.
-
-PRINSIP UTAMA: Visual harus mendukung narasi skrip secara kontekstual — sesuaikan 
-dengan kategori "${category}". Jangan terpaku pada format review tempat jika skrip 
-bukan tentang tempat. Visual harus memperkuat pesan skrip, bukan terisolasi dari konteks.
-
-- Adegan on-screen karakter: deskripsikan ekspresi, gestur, dan posisi karakter secara spesifik.
-- Adegan off-screen (VO): WAJIB deskripsikan visual tempat/produk/konteks dengan suasana — 
-  BUKAN hanya objek sendirian.
-- DILARANG adegan off-screen diisi deskripsi karakter dalam bentuk apapun.`;
+${uraiVisualGuide}`;
 
     const systemInstruction =
       promptMode === 'bebas' ? bebasModeInstruction :
-      promptMode === 'rapi' ? rapiModeInstruction :
+      promptMode === 'rapi' ? (rapiSubMode === 'dengan-text' ? rapiDenganTextInstruction : rapiTanpaTextInstruction) :
       uraiModeInstruction;
 
     const userPrompt = promptMode === 'urai'
@@ -927,10 +1069,9 @@ Kategori: ${category}
 Nama & Deskripsi: ${nameDesc || '-'}
 Karakter: ${character || 'faceless'}
 Durasi per Segmen: ${segmentDuration} detik
-Jumlah Adegan per Segmen: ${totalScenes} adegan (~2 detik per adegan)
+Jumlah Adegan per Segmen: ${isUraiMode ? (segmentDuration === '10' ? 5 : 8) : totalScenes} adegan (~2 detik per adegan)
 
 CATATAN: Sesuaikan gaya visual dan tone dengan kategori "${category}".
-Jika kategori adalah Konten Umum/Bebas, sesuaikan visual dengan topik skrip secara bebas tanpa terpaku pada format review.
 
 SKRIP YANG HARUS DIURAI:
 """
@@ -953,7 +1094,7 @@ ${stylePerContent}`;
       const data = await callGemini({
         userPrompt,
         systemInstruction,
-        temperature: promptMode === 'urai' ? 0.65 : 0.8,
+        temperature: promptMode === 'urai' ? 0.65 : isDenganTextMode ? 0.75 : 0.8,
         useSearch: promptMode !== 'urai',
         creditCost,
         ...(isPro ? {} : { userApiKey: freeApiKey }),
@@ -976,7 +1117,7 @@ ${stylePerContent}`;
         const styleId = styleDistribution[i] ?? activeStyles[0];
         const styleTitle = getStyleTitle(styleId);
         const totalSegments = (prompt.match(/▶ SEGMEN/g) || []).length;
-        const label = promptMode === 'urai' ? 'URAI SKRIP' : styleTitle.toUpperCase();
+        const label = promptMode === 'urai' ? 'URAI SKRIP' : isDenganTextMode ? `${styleTitle.toUpperCase()} + TEXT OVERLAY` : styleTitle.toUpperCase();
         return `═══════════════════════════════════════
 KONTEN #${i + 1} — ${label}
 ═══════════════════════════════════════
@@ -996,7 +1137,8 @@ ${prompt}`;
       });
       setVisualRefsByMode(prev => ({ ...prev, [promptMode]: refs }));
 
-      if (promptMode === 'rapi' || promptMode === 'urai') {
+      // Only validate dialog length for rapi tanpa-text and urai
+      if ((promptMode === 'rapi' && rapiSubMode === 'tanpa-text') || promptMode === 'urai') {
         const warnings = formattedPrompts.map((p: string) => validateDialogLength(p, segmentDuration, promptMode === 'urai'));
         setWarningsByMode(prev => ({ ...prev, [promptMode]: warnings }));
       }
@@ -1009,7 +1151,12 @@ ${prompt}`;
     }
   };
 
-  const scenePreview = promptMode === 'urai' ? getUraiScenePreview() : getScenePreview();
+  const scenePreview = promptMode === 'urai'
+    ? getUraiScenePreview()
+    : (promptMode === 'rapi' && rapiSubMode === 'dengan-text')
+      ? getDenganTextScenePreview()
+      : getScenePreview();
+
   const estimatedCost = calcCreditCost(promptMode, totalDuration, segmentDuration, contentCount, scriptInput);
   const hasEnoughCredit = isPro ? user.credits >= estimatedCost : true;
   const canGenerate = !isLoading && (isPro ? hasEnoughCredit : !!freeApiKey.trim()) && (promptMode !== 'urai' || !!scriptInput.trim());
@@ -1100,19 +1247,45 @@ ${prompt}`;
                   {promptMode === 'bebas' && (
                     <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-lg px-4 py-3">
                       <p className="text-xs font-semibold text-yellow-400 mb-1">🚀 Cara Kerja Mode Ini</p>
-                      <p className="text-xs text-zinc-400">Isi form → Isi form → AI riset produk lewat Google lalu langsung buat prompt video sinematik gaya TikTok GO. Output berbentuk paragraf naratif siap pakai di Sora, adegan di tentukan oleh sora, untuk panjang dialog atau narasi bisa di edit jika terlalu panjang, seg 10 detik ideal 25 kata, seg 15 detik 37 kata. cek jumlah kata bisa di mode urai bagian bawah di input narasi.</p>
+                      <p className="text-xs text-zinc-400">Isi form → AI riset produk lewat Google lalu langsung buat prompt video sinematik gaya TikTok GO. Output berbentuk paragraf naratif siap pakai di Sora, adegan di tentukan oleh sora, untuk panjang dialog atau narasi bisa di edit jika terlalu panjang, seg 10 detik ideal 25 kata, seg 15 detik 37 kata.</p>
                     </div>
                   )}
 
                   {promptMode === 'rapi' && (
-                    <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="flex flex-col gap-6 mt-2 pt-4 border-t border-purple-800">
-                      <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-lg px-4 py-3">
-                        <p className="text-xs font-semibold text-yellow-400 mb-1">🎬 Cara Kerja Mode Ini</p>
-                        <p className="text-xs text-zinc-400">Isi form → AI riset produk lewat Google, tulis skrip penuh, lalu bagi ke segmen & adegan dengan format visual yang rapi.</p>
-                      </div>
-                      <AppearanceSelector value={characterAppearance} onChange={setCharacterAppearance} />
-                      <DialogSelector value={dialogStrategy} onChange={setDialogStrategy} />
-                      <ScenePreviewBox scenePreview={scenePreview} segmentDuration={segmentDuration} mode="rapi" />
+                    <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="flex flex-col gap-5 mt-2 pt-4 border-t border-purple-800">
+
+                      {/* Sub-mode selector — NEW */}
+                      <RapiSubModeSelector value={rapiSubMode} onChange={setRapiSubMode} />
+
+                      {/* Tanpa Text sub-mode info & options */}
+                      {rapiSubMode === 'tanpa-text' && (
+                        <>
+                          <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-lg px-4 py-3">
+                            <p className="text-xs font-semibold text-yellow-400 mb-1">🎬 Cara Kerja Mode Ini</p>
+                            <p className="text-xs text-zinc-400">Isi form → AI riset produk lewat Google, tulis skrip penuh, lalu bagi ke segmen & adegan dengan format visual yang rapi. Tanpa text overlay.</p>
+                          </div>
+                          <AppearanceSelector value={characterAppearance} onChange={setCharacterAppearance} />
+                          <DialogSelector value={dialogStrategy} onChange={setDialogStrategy} />
+                          <ScenePreviewBox scenePreview={scenePreview} segmentDuration={segmentDuration} mode="rapi" />
+                        </>
+                      )}
+
+                      {/* Dengan Text sub-mode info & options — NEW */}
+                      {rapiSubMode === 'dengan-text' && (
+                        <>
+                          <div className="bg-green-900/20 border border-green-700/50 rounded-lg px-4 py-3">
+                            <p className="text-xs font-semibold text-green-400 mb-2">✨ Cara Kerja Mode Ini</p>
+                            <div className="flex flex-col gap-1 text-xs text-zinc-400">
+                              <p>• AI riset produk → buat <strong className="text-zinc-300">visual brief lengkap</strong> (deskripsi produk, latar, aturan visual)</p>
+                              <p>• Output berisi <strong className="text-zinc-300">gaya video + SFX</strong> yang spesifik</p>
+                              <p>• Skrip <strong className="text-zinc-300">ber-time-code</strong>: HOOK → BODY → CTA dengan text overlay TikTok</p>
+                              <p>• <strong className="text-zinc-300">Karakter hanya muncul di CTA</strong> — kalimat ke-2 ajak klik tag lokasi</p>
+                            </div>
+                          </div>
+                          {/* Scene preview for dengan-text mode */}
+                          <DenganTextScenePreview segmentDuration={segmentDuration} />
+                        </>
+                      )}
                     </motion.div>
                   )}
 
@@ -1120,7 +1293,7 @@ ${prompt}`;
                     <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="flex flex-col gap-6 mt-2 pt-4 border-t border-purple-800">
                       <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-lg px-4 py-3">
                         <p className="text-xs font-semibold text-yellow-400 mb-1">✂️ Cara Kerja Mode Ini</p>
-                        <p className="text-xs text-zinc-400">Berikan skripmu → AI bertindak sebagai sutradara: menentukan jumlah segmen, membagi dialog ke setiap adegan (~2 detik/adegan), dan merancang visual sinematik. Dialog tidak diubah, hanya dibagi. Kategori wajib di pilih sesuaikan dengan apa yang mau di urai, Efektif untuk membuat video dengan gambar referensi di sora seperti foto produk Lokasi dll.</p>
+                        <p className="text-xs text-zinc-400">Berikan skripmu → AI bertindak sebagai sutradara: menentukan jumlah segmen, membagi dialog ke setiap adegan (~2 detik/adegan), dan merancang visual sinematik. Dialog tidak diubah, hanya dibagi.</p>
                       </div>
                       <AppearanceSelector value={characterAppearance} onChange={setCharacterAppearance} />
                       <ScenePreviewBox scenePreview={scenePreview} segmentDuration={segmentDuration} mode="urai" />
@@ -1131,14 +1304,14 @@ ${prompt}`;
                 {/* Input User */}
                 <div className="flex flex-col gap-6 p-6 bg-gray-800/50 border border-purple-700 rounded-xl">
                   <h2 className="text-2xl font-semibold text-yellow-400 border-b border-purple-700 pb-3">📥 Input User</h2>
-                <div className="bg-gray-900/60 border border-gray-700 rounded-lg px-4 py-3">
-                  <p className="text-xs font-semibold text-purple-300 mb-2">📌 Panduan Kategori per Mode</p>
-                  <div className="flex flex-col gap-1 text-xs text-zinc-500">
-                    <p><span className="text-yellow-400 font-medium">Bebas & Rapi</span> → hanya untuk Makanan/Minuman, Hotel, Tempat Wisata (ada bank hook & panduan visual lengkap)</p>
-                    <p><span className="text-yellow-400 font-medium">Urai</span> → Membuat Prompt sora dari mengurai Narasi Skrip apa saja misal skrip buatan sendiri ChatGPT Gemini dll, Sesuakan Kategori dengan apa yang mau di urai</p>
-                    <p><span className="text-yellow-400 font-medium">Skrip Jualan</span> → Membuat Narasi Skrip Khusus Jualan pakai kategori Produk Jualan</p>
+                  <div className="bg-gray-900/60 border border-gray-700 rounded-lg px-4 py-3">
+                    <p className="text-xs font-semibold text-purple-300 mb-2">📌 Panduan Kategori per Mode</p>
+                    <div className="flex flex-col gap-1 text-xs text-zinc-500">
+                      <p><span className="text-yellow-400 font-medium">Bebas & Rapi</span> → hanya untuk Makanan/Minuman, Hotel, Tempat Wisata (ada bank hook & panduan visual lengkap)</p>
+                      <p><span className="text-yellow-400 font-medium">Urai</span> → Membuat Prompt sora dari mengurai Narasi Skrip apa saja, Sesuaikan Kategori dengan apa yang mau di urai</p>
+                      <p><span className="text-yellow-400 font-medium">Skrip Jualan</span> → Membuat Narasi Skrip Khusus Jualan pakai kategori Produk Jualan</p>
+                    </div>
                   </div>
-                </div>                  
                   <Select label="Kategori" id="category" value={category} onChange={e => setCategory(e.target.value)}>
                     <option>Makanan/Minuman</option>
                     <option>Hotel</option>
@@ -1153,7 +1326,7 @@ ${prompt}`;
                     onChange={e => setNameDesc(e.target.value)}
                     placeholder={promptMode === 'urai' ? 'Opsional — nama produk, topik konten, atau kosongkan' : 'Contoh: Roti Gembul - roti lembut isi selai coklat lumer...'}
                   />
-                  <Input label="Karakter (kosongkan = faceless)" id="character" value={character} onChange={e => setCharacter(e.target.value)} placeholder="Contoh: Pria review makanan, gaya santai" />
+                  <Input label="Karakter (kosongkan = faceless)" id="character" value={character} onChange={e => setCharacter(e.target.value)} placeholder="Contoh: @batop40 mengenakan pakaian stylish" />
 
                   {promptMode !== 'urai' ? (
                     <div className="grid grid-cols-3 gap-4">
@@ -1208,21 +1381,21 @@ ${prompt}`;
                   <div className="flex flex-col gap-4 p-6 bg-gray-800/50 border border-purple-700 rounded-xl">
                     <div className="flex items-center justify-between border-b border-purple-700 pb-3">
                       <h2 className="text-2xl font-semibold text-yellow-400">🎨 Gaya Konten</h2>
-                      <span className="text-xs text-purple-300 bg-purple-900/50 px-2 py-1 rounded-full">{activeStyles.length} terpilih.bisa pilih lebih dari 1</span>
+                      <span className="text-xs text-purple-300 bg-purple-900/50 px-2 py-1 rounded-full">{activeStyles.length} terpilih · bisa pilih lebih dari 1</span>
                     </div>
-                   {activeStyles.length > 1 && (
-  <div className="bg-gray-900/60 border border-purple-800 rounded-lg px-4 py-3">
-    <p className="text-xs text-purple-300 mb-2 font-semibold">📊 Distribusi ke {contentCount} konten:</p>
-    <div className="flex flex-wrap gap-1.5">
-      {Array.from({ length: Math.min(parseInt(contentCount) || 1, 10) }, (_, i) => {
-        const styleId = activeStyles[i % activeStyles.length];
-        const style = contentStyles.find(s => s.id === styleId);
-        return <span key={i} className="text-xs bg-purple-800/60 text-purple-200 px-2 py-0.5 rounded-full">#{i + 1} {style?.title.split(' ')[0]}</span>;
-      })}
-      {(parseInt(contentCount) || 1) > 10 && <span className="text-xs text-purple-400 italic px-1">+{(parseInt(contentCount) || 1) - 10} lagi...</span>}
-    </div>
-  </div>
-)}
+                    {activeStyles.length > 1 && (
+                      <div className="bg-gray-900/60 border border-purple-800 rounded-lg px-4 py-3">
+                        <p className="text-xs text-purple-300 mb-2 font-semibold">📊 Distribusi ke {contentCount} konten:</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {Array.from({ length: Math.min(parseInt(contentCount) || 1, 10) }, (_, i) => {
+                            const styleId = activeStyles[i % activeStyles.length];
+                            const style = contentStyles.find(s => s.id === styleId);
+                            return <span key={i} className="text-xs bg-purple-800/60 text-purple-200 px-2 py-0.5 rounded-full">#{i + 1} {style?.title.split(' ')[0]}</span>;
+                          })}
+                          {(parseInt(contentCount) || 1) > 10 && <span className="text-xs text-purple-400 italic px-1">+{(parseInt(contentCount) || 1) - 10} lagi...</span>}
+                        </div>
+                      </div>
+                    )}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {contentStyles.map(style => (
                         <StyleButton key={style.id} number={style.number} title={style.title} description={style.description} isActive={activeStyles.includes(style.id)} onClick={() => toggleStyle(style.id)} />
@@ -1252,7 +1425,13 @@ ${prompt}`;
                   disabled={!canGenerate}
                   className="w-full bg-gradient-to-r from-yellow-500 to-purple-600 text-white font-bold py-4 rounded-lg text-lg hover:from-yellow-400 hover:to-purple-500 transition-all duration-300 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? 'Menghasilkan...' : promptMode === 'urai' ? '✂️ Urai Skrip Jadi Prompt' : '✨ Hasilkan Prompt'}
+                  {isLoading
+                    ? 'Menghasilkan...'
+                    : promptMode === 'urai'
+                      ? '✂️ Urai Skrip Jadi Prompt'
+                      : promptMode === 'rapi' && rapiSubMode === 'dengan-text'
+                        ? '✨ Hasilkan Prompt + Text Overlay'
+                        : '✨ Hasilkan Prompt'}
                 </button>
                 {!canGenerate && !isLoading && (
                   <p className="text-xs text-center text-zinc-500 -mt-4">
@@ -1265,7 +1444,9 @@ ${prompt}`;
               {/* ── Output Section ── */}
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="flex flex-col gap-8">
                 <div className="flex justify-between items-center border-b border-purple-700 pb-3">
-                  <h2 className="text-2xl font-semibold text-yellow-400">🚀 Hasil Prompt</h2>
+                  <h2 className="text-2xl font-semibold text-yellow-400">
+                    {promptMode === 'rapi' && rapiSubMode === 'dengan-text' ? '✨ Hasil Prompt + Text' : '🚀 Hasil Prompt'}
+                  </h2>
                   {prompts.length > 0 && (
                     <button onClick={downloadPrompts} className="flex items-center gap-2 text-sm bg-purple-700 text-zinc-300 px-3 py-1.5 rounded-md hover:bg-purple-600 transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1273,6 +1454,20 @@ ${prompt}`;
                     </button>
                   )}
                 </div>
+
+                {/* Dengan Text legend */}
+                {promptMode === 'rapi' && rapiSubMode === 'dengan-text' && prompts.length === 0 && !isLoading && (
+                  <div className="bg-green-900/10 border border-green-700/40 rounded-lg px-4 py-3">
+                    <p className="text-xs font-semibold text-green-400 mb-2">📋 Format output yang akan dihasilkan:</p>
+                    <div className="flex flex-col gap-1 text-xs text-zinc-500">
+                      <p>• <span className="text-zinc-300">Deskripsi visual produk</span> — detail dari hasil riset</p>
+                      <p>• <span className="text-zinc-300">Latar belakang</span> — suasana & pencahayaan</p>
+                      <p>• <span className="text-zinc-300">Gaya Video + SFX</span> — style & efek suara spesifik</p>
+                      <p>• <span className="text-zinc-300">Alur Video</span> — scene by scene</p>
+                      <p>• <span className="text-zinc-300">Skrip time-coded</span> — HOOK / BODY / CTA + text overlay</p>
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex flex-col gap-6">
                   {isLoading && (
@@ -1291,7 +1486,8 @@ ${prompt}`;
 
                   {prompts.map((prompt, index) => {
                     const segments = extractSegments(prompt);
-                    const showWordCnt = promptMode === 'rapi' || promptMode === 'urai';
+                    // Word count validation only for rapi tanpa-text and urai
+                    const showWordCnt = (promptMode === 'rapi' && rapiSubMode === 'tanpa-text') || promptMode === 'urai';
                     const wordCounts = showWordCnt ? getSegmentWordCounts(prompt, segmentDuration, promptMode === 'urai') : [];
                     const hasWarning = (promptWarnings[index]?.length ?? 0) > 0;
 
@@ -1299,9 +1495,28 @@ ${prompt}`;
                       <div key={index} className="flex flex-col gap-3">
                         <div className="relative group">
                           <Textarea id={`prompt-${index}`} value={prompt} onChange={e => handlePromptChange(e.target.value, index)} className="h-48" />
-                          <button onClick={() => copyPrompt(prompt, index)} className="absolute top-3 right-3 bg-purple-700/80 text-white px-3 py-1.5 rounded-md text-xs hover:bg-purple-600 font-semibold">
-                            {copiedIndex === index ? '✓ Tersalin!' : 'Salin Semua'}
-                          </button>
+                          <div className="absolute top-3 right-3 flex gap-1.5">
+                            <button
+                              onClick={() => {
+                                const start = prompt.indexOf('▶ SEGMEN');
+                                const content = start !== -1 ? prompt.substring(start) : prompt;
+                                const blob = new Blob([content], { type: 'text/plain' });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url; a.download = `sora-prompt-konten-${index + 1}.txt`;
+                                document.body.appendChild(a); a.click();
+                                document.body.removeChild(a); URL.revokeObjectURL(url);
+                              }}
+                              className="bg-gray-700/90 text-zinc-300 px-2.5 py-1.5 rounded-md text-xs hover:bg-gray-600 font-semibold flex items-center gap-1"
+                              title={`Download konten #${index + 1}`}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                              #{index + 1}
+                            </button>
+                            <button onClick={() => copyPrompt(prompt, index)} className="bg-purple-700/80 text-white px-3 py-1.5 rounded-md text-xs hover:bg-purple-600 font-semibold">
+                              {copiedIndex === index ? '✓ Tersalin!' : 'Salin Semua'}
+                            </button>
+                          </div>
                         </div>
 
                         {showWordCnt && wordCounts.length > 0 && (
@@ -1398,6 +1613,80 @@ function ModeSelector({ promptMode, setPromptMode, modeAllowed }: { promptMode: 
           </button>
         );
       })}
+    </div>
+  );
+}
+
+// ── NEW: Sub-mode selector untuk Mode Rapi ───────────────────────────────
+function RapiSubModeSelector({ value, onChange }: { value: string; onChange: (v: RapiSubModeKey) => void }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-sm font-semibold text-purple-300">📝 Format Prompt</p>
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          onClick={() => onChange('tanpa-text')}
+          className={`flex flex-col gap-1.5 text-left px-4 py-3 rounded-lg border transition-all ${value === 'tanpa-text' ? 'bg-purple-700/50 border-purple-400 text-white' : 'bg-gray-900/40 border-gray-700 text-zinc-400 hover:border-purple-600 hover:text-zinc-200'}`}
+        >
+          <span className="flex items-center gap-2">
+            <span className={`w-3 h-3 rounded-full border-2 flex-shrink-0 ${value === 'tanpa-text' ? 'border-yellow-400 bg-yellow-400' : 'border-gray-500'}`} />
+            <span className="text-sm font-bold">🎬 Tanpa Text</span>
+          </span>
+          <span className="text-xs text-zinc-500 ml-5">Prompt adegan visual murni & sinematik</span>
+        </button>
+        <button
+          onClick={() => onChange('dengan-text')}
+          className={`flex flex-col gap-1.5 text-left px-4 py-3 rounded-lg border transition-all ${value === 'dengan-text' ? 'bg-green-800/40 border-green-400 text-white' : 'bg-gray-900/40 border-gray-700 text-zinc-400 hover:border-green-600 hover:text-zinc-200'}`}
+        >
+          <span className="flex items-center gap-2">
+            <span className={`w-3 h-3 rounded-full border-2 flex-shrink-0 ${value === 'dengan-text' ? 'border-green-400 bg-green-400' : 'border-gray-500'}`} />
+            <span className="text-sm font-bold">✨ Dengan Text</span>
+          </span>
+          <span className="text-xs text-zinc-500 ml-5">TikTok style: subtitle, promo text, SFX</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── NEW: Scene preview for "Dengan Text" sub-mode ────────────────────────
+function DenganTextScenePreview({ segmentDuration }: { segmentDuration: string }) {
+  const is10s = segmentDuration === '10';
+
+  const sections = is10s
+    ? [
+        { label: 'HOOK', time: '0–2 dtk', type: 'voice-over', icon: '🎙️', color: 'bg-yellow-800/40 border-yellow-600 text-yellow-200', textIcon: '🔥' },
+        { label: 'BODY 1', time: '2–5 dtk', type: 'voice-over', icon: '🎙️', color: 'bg-blue-800/40 border-blue-600 text-blue-200', textIcon: '📝' },
+        { label: 'BODY 2', time: '5–8 dtk', type: 'voice-over', icon: '🎙️', color: 'bg-blue-800/40 border-blue-600 text-blue-200', textIcon: '📝' },
+        { label: 'CTA', time: '8–10 dtk', type: 'on-screen', icon: '🎭', color: 'bg-purple-800/50 border-purple-400 text-purple-200', textIcon: '📍' },
+      ]
+    : [
+        { label: 'HOOK', time: '0–3 dtk', type: 'voice-over', icon: '🎙️', color: 'bg-yellow-800/40 border-yellow-600 text-yellow-200', textIcon: '🔥' },
+        { label: 'BODY 1', time: '3–7 dtk', type: 'voice-over', icon: '🎙️', color: 'bg-blue-800/40 border-blue-600 text-blue-200', textIcon: '📝' },
+        { label: 'BODY 2', time: '7–10 dtk', type: 'voice-over', icon: '🎙️', color: 'bg-blue-800/40 border-blue-600 text-blue-200', textIcon: '📝' },
+        { label: 'BODY 3', time: '10–13 dtk', type: 'voice-over', icon: '🎙️', color: 'bg-blue-800/40 border-blue-600 text-blue-200', textIcon: '📝' },
+        { label: 'CTA', time: '13–15 dtk', type: 'on-screen', icon: '🎭', color: 'bg-purple-800/50 border-purple-400 text-purple-200', textIcon: '📍' },
+      ];
+
+  return (
+    <div className="bg-gray-900/60 border border-green-800/60 rounded-lg px-4 py-3">
+      <p className="text-xs font-semibold text-green-400 mb-3">
+        📋 Pola skrip per segmen ({segmentDuration} detik):
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {sections.map((sec) => (
+          <div key={sec.label} className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg border text-xs font-medium ${sec.color}`}>
+            <span className="font-bold text-xs">{sec.label}</span>
+            <span>{sec.icon}</span>
+            <span className="text-zinc-400 text-[10px]">{sec.time}</span>
+            <span title="Text overlay">{sec.textIcon}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-3 text-xs text-zinc-500">
+        <span>🎙️ = Voice over (karakter tidak terlihat)</span>
+        <span>🎭 = On-screen (karakter tampak)</span>
+        <span>📝/🔥/📍 = Text overlay</span>
+      </div>
     </div>
   );
 }
