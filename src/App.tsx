@@ -1208,8 +1208,21 @@ ${prompt}`;
                   <div className="flex flex-col gap-4 p-6 bg-gray-800/50 border border-purple-700 rounded-xl">
                     <div className="flex items-center justify-between border-b border-purple-700 pb-3">
                       <h2 className="text-2xl font-semibold text-yellow-400">🎨 Gaya Konten</h2>
-                      <span className="text-xs text-purple-300 bg-purple-900/50 px-2 py-1 rounded-full">{activeStyles.length} terpilih</span>
+                      <span className="text-xs text-purple-300 bg-purple-900/50 px-2 py-1 rounded-full">{activeStyles.length} terpilih.bisa pilih lebih dari 1</span>
                     </div>
+                   {activeStyles.length > 1 && (
+  <div className="bg-gray-900/60 border border-purple-800 rounded-lg px-4 py-3">
+    <p className="text-xs text-purple-300 mb-2 font-semibold">📊 Distribusi ke {contentCount} konten:</p>
+    <div className="flex flex-wrap gap-1.5">
+      {Array.from({ length: Math.min(parseInt(contentCount) || 1, 10) }, (_, i) => {
+        const styleId = activeStyles[i % activeStyles.length];
+        const style = contentStyles.find(s => s.id === styleId);
+        return <span key={i} className="text-xs bg-purple-800/60 text-purple-200 px-2 py-0.5 rounded-full">#{i + 1} {style?.title.split(' ')[0]}</span>;
+      })}
+      {(parseInt(contentCount) || 1) > 10 && <span className="text-xs text-purple-400 italic px-1">+{(parseInt(contentCount) || 1) - 10} lagi...</span>}
+    </div>
+  </div>
+)}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {contentStyles.map(style => (
                         <StyleButton key={style.id} number={style.number} title={style.title} description={style.description} isActive={activeStyles.includes(style.id)} onClick={() => toggleStyle(style.id)} />
