@@ -37,14 +37,14 @@ export default function CreditDisplay({ user, onBuyCredits, onChangePw, onAdminP
       )}
 
       {/* Tombol beli kredit */}
-      {isPro && (
-        <button
-          onClick={onBuyCredits}
-          className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-yellow-500 text-gray-900 hover:bg-yellow-400 transition-all"
-        >
-          + Top Up
-        </button>
-      )}
+      {!isAdmin && (
+  <button
+    onClick={onBuyCredits}
+    className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-yellow-500 text-gray-900 hover:bg-yellow-400 transition-all"
+  >
+    {user.credits === 0 ? '⚠️ Top Up Kredit' : '+ Top Up'}
+  </button>
+)}
 
       {/* Nama user + menu */}
       <div className="flex items-center gap-1.5 ml-auto">
