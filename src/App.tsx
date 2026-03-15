@@ -1036,30 +1036,32 @@ ${stylePerContent}`;
         .replace(/^\[([^\]]+)\],/gm, '$1,')
         .replace(/^\[([^\]]+)\]$/gm, '$1');
 
-const generatedPrompts = responseText
-  .split('|||CONTENT_BREAK|||')
-  .map((p: string) => p.trim())
-  .filter((p: string) => 
-    promptMode === 'bebas' && bebasSubMode === 'produk'
-      ? p.length > 50
-      : p.includes('▶ SEGMEN')
-  );
+const rawSplit = (promptMode === 'bebas' && bebasSubMode === 'produk')
+  ? responseText.split(/\*{5}/).map((p: string) => p.trim()).filter((p: string) => p.length > 50)
+  : responseText.split('|||CONTENT_BREAK|||').map((p: string) => p.trim()).filter((p: string) => p.includes('▶ SEGMEN'));
 
-      const formattedPrompts = generatedPrompts.map((prompt: string, i: number) => {
-        const styleId = styleDistribution[i] ?? activeStyles[0];
-        const styleTitle = getStyleTitle(styleId);
-        const totalSegments = (prompt.match(/▶ SEGMEN/g) || []).length;
-        const label = promptMode === 'urai' ? 'URAI SKRIP' : styleTitle.toUpperCase();
-        return `═══════════════════════════════════════
+const generatedPrompts = rawSplit;
+
+const formattedPrompts = generatedPrompts.map((prompt: string, i: number) => {
+  const styleId = styleDistribution[i] ?? activeStyles[0];
+  const styleTitle = getStyleTitle(styleId);
+  const totalSegments = (prompt.match(/▶ SEGMEN/g) || []).length;
+  const label = promptMode === 'urai' ? 'URAI SKRIP' 
+    : (promptMode === 'bebas' && bebasSubMode === 'produk') ? 'PRODUK / UMUM'
+    : styleTitle.toUpperCase();
+  const durasiInfo = (promptMode === 'bebas' && bebasSubMode === 'produk')
+    ? `Durasi: 15 detik`
+    : promptMode === 'urai'
+    ? `Durasi per Segmen: ${segmentDuration} detik (${totalSegments} segmen Sora)`
+    : `Durasi Target: ${totalDuration} detik (${totalSegments} segmen Sora)`;
+  return `═══════════════════════════════════════
 KONTEN #${i + 1} — ${label}
 ═══════════════════════════════════════
 Kategori: ${category}
-${promptMode === 'urai'
-  ? `Durasi per Segmen: ${segmentDuration} detik (${totalSegments} segmen Sora)`
-  : `Durasi Target: ${totalDuration} detik (${totalSegments} segmen Sora)`}
+${durasiInfo}
 
 ${prompt}`;
-      });
+});
 
       setPromptsByMode(prev => ({ ...prev, [promptMode]: formattedPrompts }));
 
