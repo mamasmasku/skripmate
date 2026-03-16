@@ -604,7 +604,10 @@ export default function App() {
   });
   const [showFreeKey, setShowFreeKey] = useState(false);
   const [savedFreeKey, setSavedFreeKey] = useState(false);
-
+  // ── Admin manual API key (opsional) ──────────────────────────────────
+const [adminUseManualKey, setAdminUseManualKey] = useState(false);
+const [adminApiKey, setAdminApiKey] = useState('');
+const [showAdminKey, setShowAdminKey] = useState(false);
   const saveFreeApiKey = (key: string) => {
     setFreeApiKey(key);
     try { if (key) localStorage.setItem(FREE_API_KEY_STORAGE, key); else localStorage.removeItem(FREE_API_KEY_STORAGE); } catch {}
@@ -1266,7 +1269,48 @@ ${prompt}`;
             />
           </div>
         </header>
-
+{/* ── ADMIN: Toggle API Key ── */}
+{isAdmin && (
+  <div className="mb-4 p-4 bg-gray-800/60 border border-yellow-700/40 rounded-xl flex flex-col gap-3">
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <span>⚙️</span>
+        <h3 className="text-sm font-bold text-yellow-400">Mode API Key (Admin)</h3>
+      </div>
+      <div className="flex gap-2">
+        <button
+          onClick={() => setAdminUseManualKey(false)}
+          className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-all ${!adminUseManualKey ? 'bg-yellow-500 text-gray-900' : 'bg-gray-700/50 text-zinc-400 hover:text-white'}`}>
+          🖥️ Server (LiteLLM)
+        </button>
+        <button
+          onClick={() => setAdminUseManualKey(true)}
+          className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-all ${adminUseManualKey ? 'bg-yellow-500 text-gray-900' : 'bg-gray-700/50 text-zinc-400 hover:text-white'}`}>
+          🔑 Manual Key
+        </button>
+      </div>
+    </div>
+    {adminUseManualKey && (
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <input
+            type={showAdminKey ? 'text' : 'password'}
+            value={adminApiKey}
+            onChange={e => setAdminApiKey(e.target.value)}
+            placeholder="Masukkan Gemini API Key manual..."
+            className="w-full bg-gray-900/80 border border-gray-600 rounded-lg px-4 py-2.5 pr-10 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 font-mono"
+          />
+          <button onClick={() => setShowAdminKey(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 text-xs">
+            {showAdminKey ? '🙈' : '👁️'}
+          </button>
+        </div>
+      </div>
+    )}
+    <p className="text-xs text-zinc-600">
+      {adminUseManualKey ? '🔑 Menggunakan API Key manual — langsung ke Gemini, tidak pakai LiteLLM' : '🖥️ Menggunakan server key via LiteLLM — kredit tetap dipotong'}
+    </p>
+  </div>
+)}
         {/* ── FREE: API Key Panel ── */}
         {!isPro && (
           <div className="mb-8 p-5 bg-gray-800/60 border border-yellow-700/60 rounded-xl flex flex-col gap-4">
