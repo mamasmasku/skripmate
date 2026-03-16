@@ -793,14 +793,18 @@ const [showAdminKey, setShowAdminKey] = useState(false);
     const interval = setInterval(() => { i = (i + 1) % skripLoadingMessages.length; setSkripJualanLoadingText(skripLoadingMessages[i]); }, 1500);
     try {
       const creditCost = config.jumlahSkrip;
-      const data = await callGemini({
+     const data = await callGemini({
   userPrompt: buildSkripJualanUserPrompt(config),
   systemInstruction: buildSkripJualanSystemPrompt(config),
   temperature: 0.8,
   useSearch: false,
   promptMode: 'skrip-jualan',
   contentCount: String(config.jumlahSkrip),
-  ...(isPro ? {} : { userApiKey: freeApiKey }),
+  ...(isAdmin && adminUseManualKey
+    ? { userApiKey: adminApiKey, adminManualKey: true }
+    : !isPro
+    ? { userApiKey: freeApiKey }
+    : {}),
 });
       setSkripJualanOutput(data.text || '');
       if (data.credits !== undefined) updateCredits(data.credits);
@@ -1178,7 +1182,11 @@ ${stylePerContent}`;
   contentCount,
   scriptInputWordCount: scriptInput.trim().split(/\s+/).filter(Boolean).length,
   rapiSubMode,
-  ...(isPro ? {} : { userApiKey: freeApiKey }),
+  ...(isAdmin && adminUseManualKey
+    ? { userApiKey: adminApiKey, adminManualKey: true }
+    : !isPro
+    ? { userApiKey: freeApiKey }
+    : {}),
 });
 
       if (data.credits !== undefined) updateCredits(data.credits);
