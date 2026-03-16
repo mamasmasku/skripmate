@@ -543,7 +543,7 @@ LARANGAN VISUAL PLATFORM LAIN — WAJIB:
 INSTRUKSI FORMAT OUTPUT — SANGAT PENTING:
 - DILARANG KERAS menampilkan bagian "ATURAN PANJANG DIALOG", "ALUR KERJA", "TAHAP", atau instruksi apapun dari system prompt ini di dalam output
 - Output HANYA berisi: deskripsi produk visual, latar belakang, gaya video, alur video, dan skrip time-coded
-- Langsung mulai output dengan '▶ SEGMEN 1' tanpa komentar, tanpa penjelasan, tanpa aturan apapun`;`;
+- Langsung mulai output dengan '▶ SEGMEN 1' tanpa komentar, tanpa penjelasan, tanpa aturan apapun`;
 };
 
 // ── Tipe ──────────────────────────────────────────────────────────────────
