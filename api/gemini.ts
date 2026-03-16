@@ -23,6 +23,7 @@ const {
   segmentDuration      = '15',
   contentCount         = '1',
   scriptInputWordCount = 0,
+  adminManualKey       = false,
 } = req.body;
 
 // Hitung creditCost di server — tidak bisa dimanipulasi dari frontend
@@ -53,10 +54,10 @@ const creditCost = calcCost();
   let baseURL: string;
   let currentCredits = 0;
 
-  if (payload.role === 'free') {
-    // Free: wajib pakai API key sendiri, tidak potong kredit
+  if (payload.role === 'free' || (payload.role === 'admin' && adminManualKey)) {
+    // Free atau Admin pakai manual key → langsung ke Gemini, tidak potong kredit
     if (!userApiKey)
-      return res.status(400).json({ error: 'Mode Free membutuhkan Gemini API Key sendiri' });
+      return res.status(400).json({ error: 'API Key wajib diisi' });
     apiKeyToUse = userApiKey;
     baseURL     = GEMINI_DIRECT_URL;
   } else {
