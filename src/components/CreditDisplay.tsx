@@ -6,6 +6,7 @@ interface Props {
   onChangePw:    () => void;
   onAdminPanel?: () => void;
   onLogout:      () => void;
+  onRefresh?:    () => void;
 }
 
 export default function CreditDisplay({ user, onBuyCredits, onChangePw, onAdminPanel, onLogout }: Props) {
@@ -35,7 +36,14 @@ export default function CreditDisplay({ user, onBuyCredits, onChangePw, onAdminP
           💎 {user.credits} kredit
         </span>
       )}
-
+{isPro && onRefresh && (
+  <button
+    onClick={onRefresh}
+    title="Sync kredit"
+    className="text-zinc-500 hover:text-yellow-400 transition-colors text-xs">
+    🔄
+  </button>
+)}
       {/* Tombol beli kredit */}
       {!isAdmin && (
   <button
