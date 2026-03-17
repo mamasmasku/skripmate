@@ -9,7 +9,7 @@ interface Props {
   onRefresh?:    () => void;
 }
 
-export default function CreditDisplay({ user, onBuyCredits, onChangePw, onAdminPanel, onLogout }: Props) {
+export default function CreditDisplay({ user, onBuyCredits, onChangePw, onAdminPanel, onLogout, onRefresh }: Props) {
   const isPro = user.role === 'admin' || user.credits > 0;
   const isAdmin = user.role === 'admin';
 
