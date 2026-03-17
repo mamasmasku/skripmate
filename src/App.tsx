@@ -591,7 +591,7 @@ function ChangePwModal({ token, onClose }: { token: string; onClose: () => void 
 // App
 // ═════════════════════════════════════════════════════════════════════════
 export default function App() {
-  const { user, token, isLoading: authLoading, loginError, login, logout, updateCredits, upgradeRole } = useAuth();
+  const { user, token, isLoading: authLoading, loginError, login, logout, updateCredits, upgradeRole, refreshUser } = useAuth();
 
   // ── Modal states ──────────────────────────────────────────────────────
   const [showBuyModal, setShowBuyModal] = useState(false);
@@ -681,6 +681,13 @@ const [showAdminKey, setShowAdminKey] = useState(false);
     }
     return () => clearInterval(interval);
   }, [isLoading, promptMode, rapiSubMode]);
+  useEffect(() => {
+  if (!token) return;
+  const interval = setInterval(() => {
+    refreshUser();
+  }, 30_000);
+  return () => clearInterval(interval);
+}, [token, refreshUser]);
 
   const toggleStyle = (styleId: string) => {
     setActiveStyles(prev => {
