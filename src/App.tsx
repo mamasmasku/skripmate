@@ -1281,6 +1281,7 @@ ${prompt}`;
               onChangePw={() => setShowChangePw(true)}
               onAdminPanel={isAdmin ? () => setShowAdminPanel(true) : undefined}
               onLogout={logout}
+              onRefresh={refreshUser}
             />
           </div>
         </header>
