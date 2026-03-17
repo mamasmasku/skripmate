@@ -112,7 +112,10 @@ const creditCost = calcCost();
       });
     }
 
-    return res.status(200).json({ text, credits: newCredits });
+   return res.status(200).json({ 
+  text, 
+  ...(adminManualKey ? {} : { credits: newCredits }) // kalau manual key, tidak kirim credits
+});
 
   } catch (error: any) {
     console.error('Gemini error:', error);
