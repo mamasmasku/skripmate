@@ -640,9 +640,10 @@ const [showAdminKey, setShowAdminKey] = useState(false);
   const [dialogStrategy, setDialogStrategy] = useState('voice-over-penuh');
   const [scriptInput, setScriptInput] = useState('');
 
-  const prompts = promptsByMode[promptMode] ?? [];
-  const promptWarnings = warningsByMode[promptMode] ?? [];
-  const visualRefs = visualRefsByMode[promptMode] ?? [];
+const storageKey = promptMode === 'rapi' ? `rapi-${rapiSubMode}` : promptMode;
+const prompts = promptsByMode[storageKey] ?? [];
+const promptWarnings = warningsByMode[storageKey] ?? [];
+const visualRefs = visualRefsByMode[storageKey] ?? [];
 
   const [skripJualanOutput, setSkripJualanOutput] = useState('');
   const [isSkripJualanLoading, setIsSkripJualanLoading] = useState(false);
@@ -711,12 +712,13 @@ const [showAdminKey, setShowAdminKey] = useState(false);
   };
 
   const handlePromptChange = (newText: string, index: number) => {
+    const storageKey = promptMode === 'rapi' ? `rapi-${rapiSubMode}` : promptMode;
     const updated = [...prompts]; updated[index] = newText;
-    setPromptsByMode(prev => ({ ...prev, [promptMode]: updated }));
+    setPromptsByMode(prev => ({ ...prev, [storageKey]: updated }));
     if ((promptMode === 'rapi' && rapiSubMode === 'tanpa-text') || promptMode === 'urai' || promptMode === 'bebas') {
       const updatedWarnings = [...promptWarnings];
       updatedWarnings[index] = validateDialogLength(newText, segmentDuration, promptMode === 'urai');
-      setWarningsByMode(prev => ({ ...prev, [promptMode]: updatedWarnings }));
+      setWarningsByMode(prev => ({ ...prev, [storageKey]: updatedWarnings }));
     }
   };
 
@@ -825,10 +827,11 @@ const [showAdminKey, setShowAdminKey] = useState(false);
 
   // ── Handler Generate Prompt ───────────────────────────────────────────
   const handleGenerate = async () => {
+     const storageKey = promptMode === 'rapi' ? `rapi-${rapiSubMode}` : promptMode; 
     setIsLoading(true);
     setGenerateError('');
-    setPromptsByMode(prev => ({ ...prev, [promptMode]: [] }));
-    setWarningsByMode(prev => ({ ...prev, [promptMode]: [] }));
+    setPromptsByMode(prev => ({ ...prev, [storageKey]: [] }));
+    setWarningsByMode(prev => ({ ...prev, [storageKey]: [] }));
 
     const getStyleTitle = (id: string) => contentStyles.find(s => s.id === id)?.title || id;
     const count = parseInt(contentCount) || 1;
@@ -1225,23 +1228,23 @@ ${promptMode === 'urai'
 ${prompt}`;
       });
 
-      setPromptsByMode(prev => ({ ...prev, [promptMode]: formattedPrompts }));
+      setPromptsByMode(prev => ({ ...prev, [storageKey]: formattedPrompts }));
 
       const refs = formattedPrompts.map((p: string) => {
         const match = p.match(/VISUAL_REF:\s*([^\n]+)/);
         return match ? match[1].trim() : nameDesc;
       });
-      setVisualRefsByMode(prev => ({ ...prev, [promptMode]: refs }));
+      setVisualRefsByMode(prev => ({ ...prev, [storageKey]: refs }));
 
       // Only validate dialog length for rapi tanpa-text and urai
       if ((promptMode === 'rapi' && rapiSubMode === 'tanpa-text') || promptMode === 'urai') {
         const warnings = formattedPrompts.map((p: string) => validateDialogLength(p, segmentDuration, promptMode === 'urai'));
-        setWarningsByMode(prev => ({ ...prev, [promptMode]: warnings }));
+        setWarningsByMode(prev => ({ ...prev, [storageKey]: warnings }));
       }
     } catch (error: any) {
       const msg = error?.message ?? 'Terjadi kesalahan';
       setGenerateError(msg);
-      setPromptsByMode(prev => ({ ...prev, [promptMode]: [`❌ ${msg}`] }));
+      setPromptsByMode(prev => ({ ...prev, [storageKey]: [`❌ ${msg}`] }));
     } finally {
       setIsLoading(false);
     }
