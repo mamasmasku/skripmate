@@ -100,7 +100,7 @@ const creditCost = calcCost();
 
     // ── Potong kredit setelah sukses (hanya pro/admin) ─────────────────────
     let newCredits = currentCredits;
-    if (payload.role !== 'free' && creditCost > 0) {
+    if (payload.role !== 'free' && !adminManualKey && creditCost > 0) {
       newCredits = Math.max(0, currentCredits - creditCost);
       await supabase.from('users')
         .update({ credits: newCredits, updated_at: new Date().toISOString() })
