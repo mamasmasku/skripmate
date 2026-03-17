@@ -814,7 +814,7 @@ const [showAdminKey, setShowAdminKey] = useState(false);
     : {}),
 });
       setSkripJualanOutput(data.text || '');
-      if (data.credits !== undefined) updateCredits(data.credits);
+      if (data.credits !== undefined && !(isAdmin && adminUseManualKey)) updateCredits(data.credits);
     } catch (e: any) {
       setGenerateError(e.message);
       setSkripJualanOutput(`❌ ${e.message}`);
@@ -1196,7 +1196,7 @@ ${stylePerContent}`;
     : {}),
 });
 
-      if (data.credits !== undefined) updateCredits(data.credits);
+      if (data.credits !== undefined && !(isAdmin && adminUseManualKey)) updateCredits(data.credits);
 
       const responseText = (data.text || '')
         .replace(/\*\*\*\*\*/g, '|||CONTENT_BREAK|||')
