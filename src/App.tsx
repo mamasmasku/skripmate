@@ -437,19 +437,7 @@ const scriptSections = allSegmentTemplates
 const slotWords = timeSlots.map(slot => ({
   ...slot,
   maxWords: Math.round((parseInt(slot.to) - parseInt(slot.from)) * wordsPerSec),
-}));
-```
-
-Setelah itu di bagian **aturan format** di dalam `return`, ganti baris:
-```
-- Hitung segmen WAJIB: Total Durasi ÷ Durasi per Segmen = jumlah segmen. DILARANG output kurang dari jumlah yang dihitung.
-```
-
-Jadi:
-```
-- Total segmen WAJIB: ${numSegments} segmen (${totalDuration} detik ÷ ${segmentDuration} detik). DILARANG kurang.
-- ATURAN NARASI MULTI-SEGMEN: Dialog MENYAMBUNG antar segmen — satu cerita utuh. Segmen 1 = HOOK + pembuka. Segmen tengah = lanjutan narasi. Segmen terakhir = puncak + CTA. DILARANG mulai hook baru di segmen 2 dst.
-  
+}));  
 
   const ctaGesture = ctaType === 'affiliate-keranjang'
     ? `${charLabel} [menunjuk ke bawah ke arah ikon keranjang, ekspresi antusias dan persuasif]`
@@ -571,7 +559,8 @@ ${scriptSections}
 **ATURAN FORMAT WAJIB:**
 - Awali tiap segmen dengan '▶ SEGMEN [N] ([X] detik)'.
 - Pisahkan segmen dengan '--', pisahkan multi-konten dengan '*****'.
-- Hitung segmen WAJIB: Total Durasi ÷ Durasi per Segmen = jumlah segmen. DILARANG output kurang dari jumlah yang dihitung.
+- Total segmen WAJIB: ${numSegments} segmen (${totalDuration} detik ÷ ${segmentDuration} detik). DILARANG kurang.
+- ATURAN NARASI MULTI-SEGMEN: Dialog MENYAMBUNG antar segmen — satu cerita utuh. Segmen 1 = HOOK + pembuka. Segmen tengah = lanjutan narasi. Segmen terakhir = puncak + CTA. DILARANG mulai hook baru di segmen 2 dst.
 - DILARANG tanda kurung [ ] di output akhir — isi SEMUA placeholder dengan konten nyata hasil riset.
 - DILARANG penjelasan/komentar apapun sebelum atau sesudah output. Langsung mulai ▶ SEGMEN 1.
 - DILARANG menuliskan kata "Karakter" sebelum nama/handle karakter.
