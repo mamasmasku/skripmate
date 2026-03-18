@@ -362,40 +362,94 @@ const buildRapiDenganTextSystemPrompt = (
   const cta = ctaTemplates[ctaType];
   const charLabel = character || 'Karakter';
 
-  const wordsPerSec = 3;
-  const slotWords = timeSlots.map(slot => ({
+const wordsPerSec = 3;
+const numSegments = Math.ceil(parseInt(totalDuration) / parseInt(segmentDuration));
+
+// Bangun template per segmen berdasarkan posisinya
+const buildSegmentTemplate = (segIdx: number): string => {
+  const isFirst = segIdx === 0;
+  const isLast = segIdx === numSegments - 1;
+  const segNum = segIdx + 1;
+
+  let slots: { from: string; to: string; label: string }[];
+  if (numSegments === 1) {
+    slots = timeSlots; // 1 segmen: pakai penuh HOOK+BODY+CTA+PENUTUP
+  } else if (isFirst) {
+    slots = is10s
+      ? [{ from: '0', to: '4', label: 'HOOK' }, { from: '4', to: '10', label: 'BODY' }]
+      : [{ from: '0', to: '4', label: 'HOOK' }, { from: '4', to: '10', label: 'BODY' }, { from: '10', to: '15', label: 'BODY' }];
+  } else if (isLast) {
+    slots = is10s
+      ? [{ from: '0', to: '4', label: 'BODY' }, { from: '4', to: '8', label: 'CTA' }, { from: '8', to: '10', label: 'BODY' }]
+      : [{ from: '0', to: '5', label: 'BODY' }, { from: '5', to: '10', label: 'BODY' }, { from: '10', to: '13', label: 'CTA' }, { from: '13', to: '15', label: 'BODY' }];
+  } else {
+    slots = is10s
+      ? [{ from: '0', to: '5', label: 'BODY' }, { from: '5', to: '10', label: 'BODY' }]
+      : [{ from: '0', to: '5', label: 'BODY' }, { from: '5', to: '10', label: 'BODY' }, { from: '10', to: '15', label: 'BODY' }];
+  }
+
+  const slotWordsLocal = slots.map(slot => ({
     ...slot,
     maxWords: Math.round((parseInt(slot.to) - parseInt(slot.from)) * wordsPerSec),
   }));
 
-  let bodyCount = 0;
-  let ctaSeen = false;
-  const scriptSections = slotWords.map((slot) => {
+  let bodyCountLocal = 0;
+  let ctaSeenLocal = false;
+  const sections = slotWordsLocal.map(slot => {
     const isCTA = slot.label === 'CTA';
     const isHook = slot.label === 'HOOK';
-    if (slot.label === 'BODY') bodyCount++;
-    const currentBody = bodyCount;
-    const isClosingBody = slot.label === 'BODY' && ctaSeen;
-    if (isCTA) ctaSeen = true;
+    if (slot.label === 'BODY') bodyCountLocal++;
+    const currentBody = bodyCountLocal;
+    const isClosingBody = slot.label === 'BODY' && ctaSeenLocal;
+    if (isCTA) ctaSeenLocal = true;
     const durSec = parseInt(slot.to) - parseInt(slot.from);
 
     let content = '';
     if (isHook) {
-      content = `Voice over (maks ${slot.maxWords} kata / ${durSec} detik): "[kalimat hook yang kuat sesuai gaya konten — mulai dari keunggulan/fakta mengejutkan produk]"\nText di layar: [emoji] [HOOK TEXT KAPITAL VIRAL] [emoji] [subtext menarik]`;
+      content = `Voice over (maks ${slot.maxWords} kata / ${durSec} detik): "[hook kuat — fakta mengejutkan atau keunggulan utama produk]"\nText di layar: [emoji] [HOOK TEXT KAPITAL VIRAL] [emoji]`;
     } else if (isCTA) {
       const kataPerKalimat = Math.floor(slot.maxWords / 2);
-      content = `${charLabel} on-screen (maks ${slot.maxWords} kata total / ${durSec} detik — ~${kataPerKalimat} kata per kalimat):\nKalimat 1: "${cta.kalimat1} — maks ${kataPerKalimat} kata"\nKalimat 2: "${cta.kalimat2} — maks ${kataPerKalimat} kata"\nText: ${cta.text}`;
+      content = `${charLabel} on-screen (maks ${slot.maxWords} kata total / ${durSec} detik):\nKalimat 1: "${cta.kalimat1} — maks ${kataPerKalimat} kata"\nKalimat 2: "${cta.kalimat2} — maks ${kataPerKalimat} kata"\nText: ${cta.text}`;
     } else if (isClosingBody) {
-      content = `Voice over (maks ${slot.maxWords} kata / ${durSec} detik): "[1 kalimat penutup singkat yang memperkuat kesan produk]"\nVisual: [close-up atau wide shot produk/tempat yang paling impactful]\nText overlay: [emoji] [tagline pendek] [emoji]`;
+      content = `Voice over (maks ${slot.maxWords} kata / ${durSec} detik): "[penutup singkat — SAMBUNG dari narasi segmen sebelumnya]"\nText overlay: [emoji] [tagline pendek] [emoji]`;
     } else {
-      content = `Voice over (maks ${slot.maxWords} kata / ${durSec} detik): "[narasi body ${currentBody} dari hasil riset — detail keunggulan/fakta menarik]"\nText overlay: [emoji] [poin keunggulan singkat] [emoji] [detail menarik]`;
+      const sambungNote = segIdx > 0 ? ` — LANJUTKAN narasi dari segmen ${segNum - 1}` : '';
+      content = `Voice over (maks ${slot.maxWords} kata / ${durSec} detik): "[narasi body — detail keunggulan/fakta menarik${sambungNote}]"\nText overlay: [emoji] [poin keunggulan singkat] [emoji]`;
     }
 
-    const sectionLabel = isCTA ? 'CTA' : isHook ? 'HOOK' : isClosingBody ? `BODY ${currentBody} (PENUTUP VISUAL)` : `BODY ${currentBody}`;
+    const sectionLabel = isCTA ? 'CTA' : isHook ? 'HOOK' : isClosingBody ? `BODY ${currentBody} (PENUTUP)` : `BODY ${currentBody}`;
     return `${slot.from}–${slot.to} DETIK — ${sectionLabel}\n${content}`;
   }).join('\n\n⸻\n');
 
-  const totalMaxWords = slotWords.reduce((sum, s) => sum + s.maxWords, 0);
+  const segMaxWords = slotWordsLocal.reduce((sum, s) => sum + s.maxWords, 0);
+  return { sections, segMaxWords };
+};
+
+const allSegmentTemplates = Array.from({ length: numSegments }, (_, i) => buildSegmentTemplate(i));
+const totalMaxWords = allSegmentTemplates.reduce((sum, s) => sum + s.segMaxWords, 0);
+
+// Gabungkan jadi scriptSections multi-segmen
+const scriptSections = allSegmentTemplates
+  .map((seg, i) => `[SEGMEN ${i + 1}]\n${seg.sections}`)
+  .join('\n\n--\n\n');
+
+// slotWords tetap dibutuhkan untuk aturan panjang dialog di prompt
+const slotWords = timeSlots.map(slot => ({
+  ...slot,
+  maxWords: Math.round((parseInt(slot.to) - parseInt(slot.from)) * wordsPerSec),
+}));
+```
+
+Setelah itu di bagian **aturan format** di dalam `return`, ganti baris:
+```
+- Hitung segmen WAJIB: Total Durasi ÷ Durasi per Segmen = jumlah segmen. DILARANG output kurang dari jumlah yang dihitung.
+```
+
+Jadi:
+```
+- Total segmen WAJIB: ${numSegments} segmen (${totalDuration} detik ÷ ${segmentDuration} detik). DILARANG kurang.
+- ATURAN NARASI MULTI-SEGMEN: Dialog MENYAMBUNG antar segmen — satu cerita utuh. Segmen 1 = HOOK + pembuka. Segmen tengah = lanjutan narasi. Segmen terakhir = puncak + CTA. DILARANG mulai hook baru di segmen 2 dst.
+  
 
   const ctaGesture = ctaType === 'affiliate-keranjang'
     ? `${charLabel} [menunjuk ke bawah ke arah ikon keranjang, ekspresi antusias dan persuasif]`
