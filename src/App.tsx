@@ -312,6 +312,7 @@ const buildRapiDenganTextSystemPrompt = (
   activeStyleGuide: string,
   stylePerContent: string,
   ctaType: 'affiliate-lokasi' | 'affiliate-keranjang' | 'umum-follow' | 'umum-share' = 'affiliate-lokasi',
+  totalDuration: string = '15', 
 ): string => {
   const is10s = segmentDuration === '10';
   const totalScenes = is10s ? 4 : 6;
@@ -1057,6 +1058,7 @@ LARANGAN VISUAL PLATFORM LAIN — WAJIB:
       activeStyleGuide,
       stylePerContent,
       ctaType,
+      totalDuration,
     );
 
     // ── MODE URAI ─────────────────────────────────────────────────────
