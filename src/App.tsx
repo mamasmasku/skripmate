@@ -518,6 +518,7 @@ ${activeStyleGuide}
 
 ▶ SEGMEN [N] ([X] detik)
 
+Pemeran karakter: ${charLabel}, ${category}, gaya konten [sesuai distribusi], REAL VIDEO ONLY, setiap adegan WAJIB menampilkan gerakan nyata. DILARANG slideshow atau foto diam yang hanya di-pan/zoom.
 [Nama produk/tempat] [deskripsi visual lengkap hasil riset — 1-2 kalimat deskriptif dan spesifik]
 • [Detail visual 1: kemasan/logo/warna/merek yang khas — deskripsi spesifik dari hasil riset]
 • [Detail visual 2: tekstur/bentuk/penampilan yang menarik — detail menggiurkan/premium]
@@ -568,6 +569,7 @@ ${scriptSections}
 - Text overlay: gunakan emoji relevan + teks KAPITAL singkat yang viral dan eye-catching.
 - SFX: deskripsi suara WAJIB spesifik (bukan hanya "SFX ada" — tulis bunyi spesifik apa yang terdengar).
 - Jika membuat lebih dari 1 konten: SETIAP konten wajib menggunakan gaya konten berbeda sesuai distribusi, hook BERBEDA di setiap konten.
+- Awali tiap segmen dengan '▶ SEGMEN [N] ([X] detik)' lalu langsung baris kedua 'Pemeran karakter: ${charLabel}, ...' — JANGAN ada baris kosong di antara keduanya.
 
 ATURAN PANJANG DIALOG — WAJIB DIPATUHI:
 Patokan: ~3 kata per detik. Batas per section TIDAK BOLEH dilewati.
