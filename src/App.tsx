@@ -1784,7 +1784,7 @@ ${prompt}`;
 function ModeSelector({ promptMode, setPromptMode, modeAllowed }: { promptMode: string; setPromptMode: (m: PromptModeKey) => void; modeAllowed: (m: PromptModeKey) => boolean }) {
   const modes = [
     { id: 'bebas' as PromptModeKey, label: 'Bebas', badge: 'TikTok GO' },
-    { id: 'rapi' as PromptModeKey, label: 'Rapi', badge: 'TikTok GO' },
+    { id: 'rapi' as PromptModeKey, label: 'Rapi', badge: 'TikTok GO + Universal' },
     { id: 'urai' as PromptModeKey, label: 'Urai Skrip', badge: 'Universal' },
     { id: 'skrip-jualan' as PromptModeKey, label: 'Skrip Jualan', badge: 'Produk Affiliate' },
   ];
