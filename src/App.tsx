@@ -447,14 +447,23 @@ const slotWords = timeSlots.map(slot => ({
     ? `${charLabel} [gestur ajakan follow — menunjuk ke layar/akun, ekspresi ramah dan engaging]`
     : `${charLabel} [gestur ajakan share — ekspresi antusias, tangan membuka ke arah penonton]`;
 
-  const sceneList = Array.from({ length: totalScenes }, (_, i) => {
-    const n = i + 1;
-    const isCTAScene = n === Math.ceil(totalScenes * 0.7); // CTA at ~70% of scenes
-    return `Scene ${n} ${isCTAScene
-      ? ctaGesture
-      : `[Deskripsi visual spesifik scene ${n} — 100% fokus visual produk/tempat, TANPA karakter]`
-    }`;
-  }).join('\n');
+// SESUDAH
+const offScreenVisualGuide = category === 'Produk Jualan'
+  ? `fokus PRODUK — close-up kemasan, detail tekstur, logo, produk dari berbagai sudut. Karakter boleh sesekali muncul singkat tapi PRODUK harus dominan di frame`
+  : category === 'Hotel'
+  ? `fokus FASILITAS HOTEL — interior kamar, kolam, lobby, amenities. Karakter boleh tampil sebentar tapi fasilitas yang mendominasi frame`
+  : category === 'Tempat Wisata'
+  ? `fokus LOKASI — panorama, spot ikonik, aktivitas tempat. Karakter boleh ada di latar tapi lokasi yang mendominasi`
+  : category === 'Konten Umum/Bebas'
+  ? `fokus konteks konten — visual pendukung narasi yang relevan, suasana, elemen tematik. Karakter boleh muncul tapi visual konteks yang mendominasi`
+  : `fokus MAKANAN/MINUMAN — plating, tekstur, steam, tuangan, suasana tempat. Karakter boleh sesekali tampil tapi makanan/minuman yang mendominasi frame`;
+
+const sceneList = Array.from({ length: totalScenes }, (_, i) => {
+  const n = i + 1;
+  const isCTAScene = n === Math.ceil(totalScenes * 0.7);
+  if (isCTAScene) return `Scene ${n}: ${ctaGesture}`;
+  return `Scene ${n}: ${offScreenVisualGuide}`;
+}).join('\n');
 
   const categoryVisual = category === 'Hotel'
     ? 'fresh, premium, dan elegan'
@@ -496,8 +505,18 @@ TAHAP 2 — TULIS SKRIP LENGKAP
 Berdasarkan hasil riset dan gaya konten yang ditentukan (${stylePerContent}), tulis narasi penuh dari HOOK hingga CTA sebelum memformat ke template.
 
 ATURAN KARAKTER — KERAS, TIDAK BOLEH DILANGGAR:
-- ${charLabel} HANYA MUNCUL di section CTA (sebelum body penutup) — ON-SCREEN saat berbicara
-- Section HOOK, BODY, dan BODY PENUTUP VISUAL: 100% visual produk/tempat, TANPA karakter sama sekali
+- ${charLabel} BOLEH muncul di section HOOK dan BODY, tapi TIDAK BOLEH mendominasi frame
+- Di HOOK dan BODY: visual utama WAJIB adalah ${
+  category === 'Produk Jualan' ? 'PRODUK (kemasan, detail, close-up)' :
+  category === 'Hotel' ? 'FASILITAS HOTEL (kamar, kolam, lobby)' :
+  category === 'Tempat Wisata' ? 'LOKASI WISATA (panorama, spot ikonik)' :
+  category === 'Konten Umum/Bebas' ? 'KONTEKS KONTEN yang relevan' :
+  'MAKANAN/MINUMAN (plating, tekstur, suasana tempat)'
+} — karakter boleh ada tapi sebagai elemen pendukung, bukan subjek utama
+- Di CTA: ${charLabel} tampil ON-SCREEN penuh, bicara 2 kalimat langsung ke kamera
+- BODY PENUTUP setelah CTA: kembali ke visual produk/tempat, karakter boleh ada di latar
+- DILARANG: scene yang isinya hanya karakter berbicara tanpa produk/tempat terlihat sama sekali
+- DILARANG: karakter mendominasi lebih dari 1 scene berturut-turut di luar section CTA
 - Di section HOOK dan BODY: dialog disampaikan sebagai Voice Over (suara terdengar, orangnya tidak terlihat)
 - Di CTA: karakter muncul on-screen, bicara 2 kalimat:
   → ${cta.aturan}
