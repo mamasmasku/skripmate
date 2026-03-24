@@ -467,21 +467,66 @@ const slotWords = timeSlots.map(slot => ({
     : `${charLabel} [gestur ajakan share — ekspresi antusias, tangan membuka ke arah penonton]`;
 
 // SESUDAH
-const offScreenVisualGuide = category === 'Produk Jualan'
-  ? `fokus PRODUK — close-up kemasan, detail tekstur, logo, produk dari berbagai sudut. Karakter boleh sesekali muncul singkat tapi PRODUK harus dominan di frame`
-  : category === 'Hotel'
-  ? `fokus FASILITAS HOTEL — interior kamar, kolam, lobby, amenities. Karakter boleh tampil sebentar tapi fasilitas yang mendominasi frame`
-  : category === 'Tempat Wisata'
-  ? `fokus LOKASI — panorama, spot ikonik, aktivitas tempat. Karakter boleh ada di latar tapi lokasi yang mendominasi`
-  : category === 'Konten Umum/Bebas'
-  ? `fokus konteks konten — visual pendukung narasi yang relevan, suasana, elemen tematik. Karakter boleh muncul tapi visual konteks yang mendominasi`
-  : `fokus MAKANAN/MINUMAN — plating, tekstur, steam, tuangan, suasana tempat. Karakter boleh sesekali tampil tapi makanan/minuman yang mendominasi frame`;
+const getSceneVisual = (n: number, total: number): string => {
+  if (category === 'Produk Jualan') {
+    const visuals = [
+      `wide shot produk ${nameDesc} terdisplay rapi dengan latar bersih, pencahayaan studio`,
+      `close-up detail kemasan/label produk dari sudut depan, tekstur terlihat jelas`,
+      `medium shot produk dari sudut samping, memperlihatkan dimensi dan bentuk`,
+      `macro shot tekstur/detail unik produk yang paling menarik`,
+      `wide shot produk dalam konteks penggunaan sehari-hari, suasana natural`,
+      `close-up logo dan branding produk dengan bokeh latar yang elegan`,
+    ];
+    return visuals[(n - 1) % visuals.length];
+  } else if (category === 'Hotel') {
+    const visuals = [
+      `wide shot interior kamar lengkap dengan pencahayaan hangat dan tempat tidur rapi`,
+      `medium shot area fasilitas (kolam renang/lobby) dengan suasana keseluruhan`,
+      `close-up detail amenities premium — handuk, toiletries, dekorasi kamar`,
+      `wide shot eksterior hotel dari sudut terbaik, langit cerah`,
+      `medium shot pemandangan dari jendela kamar, view yang menakjubkan`,
+      `wide shot area makan/restoran hotel dengan suasana nyaman`,
+    ];
+    return visuals[(n - 1) % visuals.length];
+  } else if (category === 'Tempat Wisata') {
+    const visuals = [
+      `wide shot panorama lokasi ${nameDesc} dengan landmark dan langit cerah`,
+      `medium shot spot ikonik dengan pengunjung di latar, suasana ramai`,
+      `close-up detail unik tempat wisata — ornamen, tekstur, elemen khas`,
+      `wide shot area berbeda yang menarik dari lokasi ini`,
+      `medium shot aktivitas/keunikan tempat dalam konteks lingkungan penuh`,
+      `golden hour wide shot seluruh area, pencahayaan dramatis`,
+    ];
+    return visuals[(n - 1) % visuals.length];
+  } else if (category === 'Konten Umum/Bebas') {
+    const visuals = [
+      `wide shot suasana yang relevan dengan topik konten, pencahayaan natural`,
+      `medium shot elemen utama konten dengan konteks lingkungan terlihat jelas`,
+      `close-up detail yang memperkuat pesan narasi`,
+      `wide shot transisi ke sudut pandang berbeda, memperkaya visual`,
+      `medium shot pendukung yang melengkapi cerita`,
+      `wide shot penutup yang merangkum keseluruhan konteks`,
+    ];
+    return visuals[(n - 1) % visuals.length];
+  } else {
+    // Makanan/Minuman
+    const visuals = [
+      `wide shot hidangan ${nameDesc} lengkap di meja dengan suasana outlet terlihat`,
+      `close-up detail makanan/minuman — tekstur, warna, steam mengepul`,
+      `medium shot proses penyajian dengan counter/dapur terlihat di latar`,
+      `macro shot gigitan pertama atau tuangan minuman yang menggugah selera`,
+      `wide shot interior outlet nyaman dengan pengunjung di latar`,
+      `medium shot minuman/makanan dari sudut 45 derajat, pencahayaan warm`,
+    ];
+    return visuals[(n - 1) % visuals.length];
+  }
+};
 
 const sceneList = Array.from({ length: totalScenes }, (_, i) => {
   const n = i + 1;
   const isCTAScene = n === Math.ceil(totalScenes * 0.7);
   if (isCTAScene) return `Scene ${n}: ${ctaGesture}`;
-  return `Scene ${n}: ${offScreenVisualGuide}`;
+  return `Scene ${n}: ${getSceneVisual(n, totalScenes)}`;
 }).join('\n');
 
   const categoryVisual = category === 'Hotel'
