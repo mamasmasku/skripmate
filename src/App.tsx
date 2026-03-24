@@ -304,6 +304,25 @@ ORANG / LATAR / FIGURAN:
 - Untuk orang di LATAR atau figuran (bukan karakter utama): tambahkan "pengunjung berkulit sawo matang", "orang Indonesia"
 - JANGAN ubah atau tambahkan deskripsi fisik pada karakter utama`;
 
+const LARANGAN_DIALOG_RULE = `**ATURAN DIALOG AMAN — WAJIB DIPATUHI DI SEMUA KALIMAT:**
+
+DILARANG KERAS menyebut kata/frasa berikut dalam dialog, ganti dengan alternatif yang tertera:
+- "terbaik" / "nomor 1" / "paling bagus" → ganti: "salah satu yang disukai banyak orang"
+- "termurah" / "paling murah" / "murah banget" / "banting harga" → ganti: "harganya cukup bersahabat" / "harga terjangkau"
+- "paling ampuh" / "paling efektif" / "paling cepat" → ganti: "bantu memaksimalkan" / "hasil tiap orang beda"
+- "100% berhasil" / "anti gagal" / "jaminan berhasil" / "pasti berhasil" → ganti: "banyak yang cocok" / "bantu mempermudah"
+- "menyembuhkan" / "mengobati" / "terapi" → ganti: "membantu meredakan" / "mendukung aktivitas"
+- "hasil instan" / "seketika" / "instan" → ganti: "terlihat lebih cepat pada sebagian orang" / "bekerja perlahan"
+- "permanen" / "hasil permanen" → ganti: "bisa bertahan lama bila rutin"
+- "kurus" / "gemuk" / "obesitas" / "berat badan" / "menurunkan berat badan" / "menaikkan berat badan" → ganti: "lebih ringan" / "bobot tubuh" / "bantu mengelola bobot"
+- "mengecilkan perut/lengan/paha" → ganti: "bantu merapikan area tersebut"
+- "tinggi badan" / "menambah tinggi" → ganti: "postur tubuh" / "bantu mendukung postur"
+- "tubuh ideal" / "tubuh sempurna" / "langsing instan" → ganti: "versi terbaik dari diri sendiri"
+- "memutihkan" / "mencerahkan permanen" / "whitening permanen" → ganti: "mencerahkan bertahap" / "bantu menjaga kecerahan"
+- "menghilangkan jerawat 100%" → ganti: "membantu merawat kulit berjerawat"
+- DILARANG menyebut angka harga spesifik (contoh: "cuma 50 ribu", "harganya 200 ribu") — ganti dengan: "harganya terjangkau" / "harga bersahabat" / "cukup ramah di kantong"
+- DILARANG klaim harga terendah atau perbandingan harga dengan kompetitor secara spesifik`;
+
 // ── NEW: Rapi Dengan Text Overlay system prompt builder ───────────────────
 const buildRapiDenganTextSystemPrompt = (
   category: string,
@@ -530,6 +549,10 @@ LANGSUNG mulai output dengan ▶ SEGMEN 1 tanpa komentar, penjelasan, atau intro
 
 **PANDUAN GAYA KONTEN:**
 ${activeStyleGuide}
+
+===
+
+${LARANGAN_DIALOG_RULE}
 
 ===
 
@@ -1102,6 +1125,8 @@ Deskripsi visual adegan 7, Dialog: "kalimat dialog 7"` : ''}
 
 ===
 
+${LARANGAN_DIALOG_RULE}
+
 ${INDONESIAN_CONTEXT_RULE}
 
 ===
@@ -1210,6 +1235,8 @@ Deskripsi visual adegan 2, Dialog: "penggalan skrip adegan 2"
 [segmen berikutnya jika ada]
 
 ===
+
+${LARANGAN_DIALOG_RULE}
 
 ${INDONESIAN_CONTEXT_RULE}
 
