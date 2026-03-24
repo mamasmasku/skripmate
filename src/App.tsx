@@ -1027,18 +1027,38 @@ PANDUAN PANJANG SKRIP BERDASARKAN TOTAL DURASI:
 - 45 detik = ±135 kata
 - 60 detik = ±180 kata
 - 90 detik = ±260 kata
-- KALIMAT PERTAMA WAJIB mengandung pesan inti: lewat tag lokasi di bawah harganya lebih hemat dari datang langsung
+- KALIMAT PERTAMA WAJIB berupa hook yang kuat sesuai gaya konten${
+  (category === 'Makanan/Minuman' || category === 'Hotel' || category === 'Tempat Wisata') || ctaType === 'affiliate-lokasi'
+    ? ` — mengandung pesan inti: order lewat tag lokasi di bawah harganya lebih hemat dari datang langsung`
+    : ctaType === 'affiliate-keranjang'
+    ? ` — mengandung pesan inti: beli lewat keranjang di bawah lebih hemat`
+    : ctaType === 'umum-follow'
+    ? ` — buka dengan hook yang membuat penonton penasaran dan ingin follow`
+    : ` — buka dengan hook yang membuat penonton ingin share ke orang lain`
+}
 - Hitung dulu: (Total Detik ÷ Durasi Segmen) × Maks Kata Per Segmen = target kata skrip
 - Tulis skrip hingga MENDEKATI target kata — JANGAN berhenti di setengahnya
 - Kalimat sambung menyambung natural, tidak ada label section
 - JANGAN langsung ke format segmen — selesaikan paragraf skrip penuh dulu
+- CTA PENUTUP WAJIB: ${
+  ctaType === 'affiliate-lokasi'
+    ? 'ajak penonton klik tag lokasi di bawah untuk harga lebih hemat'
+    : ctaType === 'affiliate-keranjang'
+    ? 'ajak penonton klik keranjang di bawah untuk beli lebih hemat'
+    : ctaType === 'umum-follow'
+    ? 'ajak penonton follow akun untuk dapat konten serupa'
+    : 'ajak penonton share video ke teman yang butuh info ini'
+}
 
 RUMUS ALUR NARASI (pilih salah satu sesuai gaya konten):
-- UGC / Problem-Solution: Hook masalah relatable → pengalaman personal → temuan produk → detail menarik → CTA
+- UGC / Problem-Solution: Hook relatable → pengalaman personal → temuan produk/tempat → detail menarik → CTA
 - Storytelling: Hook situasi → konflik kecil → momen "wow" → resolusi memuaskan → CTA
 - Soft Selling / Listicle: Hook fakta/insight → edukasi poin 1 → poin 2 → poin 3 → CTA logis
 - Cinematic: Kalimat pendek puitis → detail sensorik kuat → keistimewaan → CTA elegan
-
+${category === 'Produk Jualan' ? '→ Fokus manfaat & keunggulan produk, akhiri dengan ajakan beli di keranjang bawah/cek keranjang bawah' :
+  category === 'Konten Umum/Bebas' ? '→ Fokus nilai/insight konten, akhiri dengan ajakan follow/share' :
+  '→ Fokus pengalaman & keunggulan tempat, akhiri dengan ajakan klik lokasi bawah'}
+  
 TAHAP 3 — BAGI SKRIP KE SEGMEN & ADEGAN
 - Hitung segmen WAJIB: Total Durasi ÷ Durasi per Segmen
 - SETIAP segmen maksimal ${maxWords} kata dialog — DILARANG melebihi batas ini
@@ -1066,7 +1086,11 @@ ${characterRule}
 **FORMAT OUTPUT — IKUTI 100%:**
 
 ▶ SEGMEN [N] ([X] detik)
-Buatkan video realistic ${character || 'faceless'} sedang review ${nameDesc} dengan gaya [GAYA KONTEN], Durasi [DURASI SEGMEN] detik, MULTI SCENE, NO TEXT, CLEAR SUBJECT LOCK, ANTI BLUR VIDEO. REAL VIDEO ONLY setiap adegan WAJIB menampilkan gerakan nyata. DILARANG slideshow atau foto diam yang hanya di-pan/zoom kameranya.
+Buatkan video realistic ${character || 'faceless'} ${
+  category === 'Produk Jualan' ? `mempromosikan ${nameDesc}` :
+  category === 'Konten Umum/Bebas' ? `membawakan konten tentang ${nameDesc}` :
+  `sedang review ${nameDesc}`
+} dengan gaya [GAYA KONTEN], Durasi [DURASI SEGMEN] detik, MULTI SCENE, NO TEXT, CLEAR SUBJECT LOCK, ANTI BLUR VIDEO. REAL VIDEO ONLY setiap adegan WAJIB menampilkan gerakan nyata. DILARANG slideshow atau foto diam yang hanya di-pan/zoom kameranya.
 
 Deskripsi visual adegan 1, Dialog: "kalimat dialog 1"
 Deskripsi visual adegan 2, Dialog: "kalimat dialog 2"
@@ -1096,23 +1120,20 @@ LARANGAN VISUAL PLATFORM LAIN — WAJIB:
 - DILARANG menampilkan struk digital, notifikasi order, atau konfirmasi pembelian dari aplikasi lain
 - DILARANG visual tangan mengetuk/scroll layar HP yang menampilkan platform lain
 
-- ATURAN VISUAL — WAJIB FOKUS KE OBJEK REVIEW:
-  Mayoritas adegan (minimal ${totalScenes === 5 ? '4' : '5'} dari ${totalScenes} adegan per segmen) HARUS menampilkan visual objek review, bukan karakter.
+- ATURAN VISUAL — WAJIB FOKUS KE OBJEK KONTEN:
+  Mayoritas adegan (minimal ${totalScenes === 5 ? '4' : '5'} dari ${totalScenes} adegan per segmen) HARUS menampilkan visual objek utama, bukan karakter.
 
-  UNTUK REVIEW MAKANAN/MINUMAN:
-  Prioritaskan visual: wide shot hidangan lengkap di meja dengan suasana outlet terlihat, medium shot
-  detail makanan dengan dekorasi tempat di latar, medium shot proses penyajian dengan counter/dapur terlihat,
-  wide shot interior outlet nyaman dengan pengunjung, medium shot minuman segar dengan meja dan tempat di sekitarnya.
-
-  UNTUK REVIEW HOTEL:
-  Prioritaskan visual: wide shot interior kamar lengkap dengan pencahayaan hangat, medium shot area
-  fasilitas (kolam, lobby) dengan suasana keseluruhan terlihat, wide shot eksterior hotel,
-  medium shot detail amenities dalam konteks ruangan penuh.
-
-  UNTUK REVIEW TEMPAT WISATA:
-  Prioritaskan visual: wide shot panorama lokasi dengan landmark dan pengunjung terlihat, medium shot
-  spot ikonik dengan suasana sekitar, wide shot area berbeda yang menarik, medium shot aktivitas
-  atau keunikan tempat dalam konteks lingkungan penuh.`;
+  ${category === 'Produk Jualan' ? `UNTUK PRODUK JUALAN:
+  Prioritaskan visual: wide shot produk dalam konteks penggunaan, medium shot detail kemasan/logo dari berbagai sudut, close-up tekstur/fitur unik produk, wide shot lifestyle yang relevan dengan produk.`
+  : category === 'Hotel' ? `UNTUK REVIEW HOTEL:
+  Prioritaskan visual: wide shot interior kamar lengkap dengan pencahayaan hangat, medium shot area fasilitas (kolam, lobby) dengan suasana keseluruhan terlihat, wide shot eksterior hotel, medium shot detail amenities dalam konteks ruangan penuh.`
+  : category === 'Tempat Wisata' ? `UNTUK REVIEW TEMPAT WISATA:
+  Prioritaskan visual: wide shot panorama lokasi dengan landmark dan pengunjung terlihat, medium shot spot ikonik dengan suasana sekitar, wide shot area berbeda yang menarik, medium shot aktivitas atau keunikan tempat dalam konteks lingkungan penuh.`
+  : category === 'Konten Umum/Bebas' ? `UNTUK KONTEN UMUM/BEBAS:
+  Prioritaskan visual: wide shot suasana yang relevan dengan topik konten, medium shot elemen utama konten dengan konteks lingkungan terlihat, close-up detail yang memperkuat narasi, wide shot penutup yang merangkum keseluruhan konten.`
+  : `UNTUK REVIEW MAKANAN/MINUMAN:
+  Prioritaskan visual: wide shot hidangan lengkap di meja dengan suasana outlet terlihat, medium shot detail makanan dengan dekorasi tempat di latar, medium shot proses penyajian dengan counter/dapur terlihat, wide shot interior outlet nyaman dengan pengunjung, medium shot minuman segar dengan meja dan tempat di sekitarnya.`}
+`;
 
     // ── MODE RAPI (dengan text) ───────────────────────────────────────
     const rapiDenganTextInstruction = buildRapiDenganTextSystemPrompt(
